@@ -16,7 +16,6 @@ int start_playing(int station_id);
 int stop_playing(void);
 GtkWidget* make_image_from_file(char* file, int x, int y);
 void change_station_playing_image(char* thumbnail);
-int set_timestamp_tsparser(void);
 
 //gtk callback prototypes
 static void destroy(GtkWidget *widget, gpointer data);
@@ -28,7 +27,6 @@ static void file_chooser_address_clicked_cb(GtkWidget *widget, gpointer parrent)
 static void stop_button_clicked_cb(GtkWidget* widget, gpointer data);
 static void play_button_clicked_cb(GtkWidget* widget, gpointer data);
 static void pause_button_clicked_cb(GtkWidget* widget, gpointer data);
-
 
 //external prototypes
 extern int get_highest_id(char* file_name);
@@ -536,12 +534,6 @@ int start_playing(int station_id) {
     else return -1;
 
     gst_element_set_state(pipeline, GST_STATE_PLAYING);
-
-
-
-    /*if (set_timestamp_tsparser() != 0) {
-        printf("pipeline does not have a tsparser\r\n");
-    }*/
 
     gtk_widget_show(stop_button);
     gtk_widget_show(pause_button);

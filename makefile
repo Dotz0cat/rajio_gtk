@@ -7,7 +7,7 @@ SRCDIR= src
 OBJ= main.o parser.o station_reader.o g-bus.o
 SRC= $(SRCDIR)/main.c $(SRCDIR)/parser.c $(SRCDIR)/station_reader.c $(SRCDIR)/g-bus.c
 
-build: $(OBJ)
+build: $(OBJ) $(SRCDIR)/rajio.h
 	$(CC) $(CFLAGS) -O2 $(OBJ) -o rajio $(LDLIBS) 
 
 $(OBJ): $(SRC)
