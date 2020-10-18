@@ -6,7 +6,7 @@
 #pragma clang diagnostic pop
 
 //marcos
-#define sql "/home/seth/c/C/rajio_gtk/stations"
+#define sql "/home/seth/c/rajio_gtk_pack_test/stations"
 
 //prototypes
 void add_station(GtkWidget* flowbox, char* station_name, char* image_file);
@@ -16,6 +16,8 @@ int start_playing(int station_id);
 int stop_playing(void);
 GtkWidget* make_image_from_file(char* file, int x, int y);
 void change_station_playing_image(char* thumbnail);
+GtkWidget* make_image_from_resource(const char* address, int x, int y);
+GInputStream* make_input_stream(const char* address);
 
 //gtk callback prototypes
 static void destroy(GtkWidget *widget, gpointer data);
@@ -27,6 +29,7 @@ static void file_chooser_address_clicked_cb(GtkWidget *widget, gpointer parrent)
 static void stop_button_clicked_cb(GtkWidget* widget, gpointer data);
 static void play_button_clicked_cb(GtkWidget* widget, gpointer data);
 static void pause_button_clicked_cb(GtkWidget* widget, gpointer data);
+static void image_loaded_cb(GObject* source_object, GAsyncResult* res, gpointer user_data);
 
 //external prototypes
 extern int get_highest_id(char* file_name);
@@ -122,7 +125,8 @@ void add_station(GtkWidget* flowbox, char* station_name, char* image_file) {
 
     //make the gtkImage
     GtkWidget* image;
-    image = make_image_from_file(image_file, 100, 100);
+    //image = make_image_from_file(image_file, 100, 100);
+    image = make_image_from_resource(image_file, 100, 100);
 
     gtk_grid_attach(GTK_GRID(grid), image, 0, 0, 3, 2);
 
@@ -623,4 +627,38 @@ void change_station_playing_image(char* thumbnail) {
     gtk_image_set_from_pixbuf(GTK_IMAGE(station_image), pixbuf);
 
     g_object_unref(pixbuf);
+}
+
+GtkWidget* make_image_from_resource(const char* address, int x, int y) {
+    GtkWidget* image;
+
+    GInputStream* stream = make_input_stream(address);
+
+    gdk_pixbuf_new_from_stream_at_scale_async(stream, x, y, FALSE, NULL, image_loaded_cb, image);
+
+    image = gtk_image_new_from_icon_name("audio-x-generic", GTK_ICON_SIZE_BUTTON);
+
+    return image;
+}
+
+static void image_loaded_cb(GObject* source_object, GAsyncResult* res, gpointer user_data) {
+    GdkPixbuf* pixbuf;
+
+    pixbuf = gdk_pixbuf_new_from_stream_finish(res, NULL);
+
+    gtk_image_set_from_pixbuf(GTK_IMAGE(user_data), pixbuf);
+
+    g_object_unref(pixbuf);
+}
+
+GInputStream* make_input_stream(const char* address) {
+    GFile* fp = g_file_new_for_uri(address);
+    GFileInputStream* stream = g_file_read(fp, NULL, NULL);
+
+    if (!stream) {
+        g_object_unref(fp);
+        return NULL;
+    }
+
+    return G_INPUT_STREAM(stream);
 }
