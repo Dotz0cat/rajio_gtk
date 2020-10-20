@@ -30,6 +30,7 @@ static void stop_button_clicked_cb(GtkWidget* widget, gpointer data);
 static void play_button_clicked_cb(GtkWidget* widget, gpointer data);
 static void pause_button_clicked_cb(GtkWidget* widget, gpointer data);
 static void image_loaded_cb(GObject* source_object, GAsyncResult* res, gpointer user_data);
+static void file_read_cb(GObject* source_object, GAsyncResult* res, gpointer user_data);
 
 //external prototypes
 extern int get_highest_id(char* file_name);
@@ -631,12 +632,25 @@ void change_station_playing_image(char* thumbnail) {
 
 GtkWidget* make_image_from_resource(const char* address, int x, int y) {
     GtkWidget* image;
+    
 
-    GInputStream* stream = make_input_stream(address);
+    struct img_and_dims {
+        GtkWidget* image;
+        int x;
+        int y;
+    };
 
-    gdk_pixbuf_new_from_stream_at_scale_async(stream, x, y, FALSE, NULL, image_loaded_cb, image);
+
+    //GInputStream* stream = make_input_stream(address);
 
     image = gtk_image_new_from_icon_name("audio-x-generic", GTK_ICON_SIZE_BUTTON);
+
+    //gdk_pixbuf_new_from_stream_at_scale_async(stream, x, y, FALSE, NULL, image_loaded_cb, image);
+
+    struct img_and_dims info = {image, x, y};
+
+    GFile* fp = g_file_new_for_uri(address);
+    g_file_read_async(fp, 1, NULL, file_read_cb, &info);
 
     return image;
 }
@@ -646,19 +660,20 @@ static void image_loaded_cb(GObject* source_object, GAsyncResult* res, gpointer 
 
     pixbuf = gdk_pixbuf_new_from_stream_finish(res, NULL);
 
-    gtk_image_set_from_pixbuf(GTK_IMAGE(user_data), pixbuf);
-
+    if (!pixbuf) {
+        gtk_image_set_from_icon_name(GTK_IMAGE(user_data), "audio-x-generic", GTK_ICON_SIZE_BUTTON);
+    }
+    else {
+        gtk_image_set_from_pixbuf(GTK_IMAGE(user_data), pixbuf);
+    }
+    
     g_object_unref(pixbuf);
 }
 
-GInputStream* make_input_stream(const char* address) {
-    GFile* fp = g_file_new_for_uri(address);
-    GFileInputStream* stream = g_file_read(fp, NULL, NULL);
+static void file_read_cb(GObject* source_object, GAsyncResult* res, gpointer user_data) {
+    GInputStream* stream = G_INPUT_STREAM(g_file_read_finish(G_FILE(source_object), res, NULL));
 
-    if (!stream) {
-        g_object_unref(fp);
-        return NULL;
-    }
+    gdk_pixbuf_new_from_stream_at_scale_async(stream, user_data->x, user_data->y, FALSE, NULL, image_loaded_cb, user_data->image);
 
-    return G_INPUT_STREAM(stream);
+    g_object_unref(stream);
 }
