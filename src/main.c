@@ -632,13 +632,6 @@ void change_station_playing_image(char* thumbnail) {
 
 GtkWidget* make_image_from_resource(const char* address, int x, int y) {
     GtkWidget* image;
-    
-
-    struct img_and_dims {
-        GtkWidget* image;
-        int x;
-        int y;
-    };
 
 
     //GInputStream* stream = make_input_stream(address);
@@ -673,7 +666,12 @@ static void image_loaded_cb(GObject* source_object, GAsyncResult* res, gpointer 
 static void file_read_cb(GObject* source_object, GAsyncResult* res, gpointer user_data) {
     GInputStream* stream = G_INPUT_STREAM(g_file_read_finish(G_FILE(source_object), res, NULL));
 
-    gdk_pixbuf_new_from_stream_at_scale_async(stream, user_data->x, user_data->y, FALSE, NULL, image_loaded_cb, user_data->image);
+    struct img_and_dims* info = (struct img_and_dims*) user_data;
+
+    printf("x: %i\r\n", info->x);
+    printf("y: %i\r\n", info->y);
+
+    gdk_pixbuf_new_from_stream_at_scale_async(stream, info->x, info->y, FALSE, NULL, image_loaded_cb, info->image);
 
     g_object_unref(stream);
 }
