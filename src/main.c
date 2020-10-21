@@ -640,10 +640,14 @@ GtkWidget* make_image_from_resource(const char* address, int x, int y) {
 
     //gdk_pixbuf_new_from_stream_at_scale_async(stream, x, y, FALSE, NULL, image_loaded_cb, image);
 
-    struct img_and_dims info = {image, x, y};
+    struct img_and_dims* info = malloc((sizeof(int)*2)+8);
+
+    info->image = image;
+    info->x = x;
+    info->y = y;
 
     GFile* fp = g_file_new_for_uri(address);
-    g_file_read_async(fp, 1, NULL, file_read_cb, &info);
+    g_file_read_async(fp, 1, NULL, file_read_cb, info);
 
     return image;
 }
@@ -653,14 +657,17 @@ static void image_loaded_cb(GObject* source_object, GAsyncResult* res, gpointer 
 
     pixbuf = gdk_pixbuf_new_from_stream_finish(res, NULL);
 
+    struct img_and_dims* info = (struct img_and_dims*) user_data;
+
     if (!pixbuf) {
-        gtk_image_set_from_icon_name(GTK_IMAGE(user_data), "audio-x-generic", GTK_ICON_SIZE_BUTTON);
+        gtk_image_set_from_icon_name(GTK_IMAGE(info->image), "audio-x-generic", GTK_ICON_SIZE_BUTTON);
     }
     else {
-        gtk_image_set_from_pixbuf(GTK_IMAGE(user_data), pixbuf);
+        gtk_image_set_from_pixbuf(GTK_IMAGE(info->image), pixbuf);
     }
     
     g_object_unref(pixbuf);
+    free(user_data);
 }
 
 static void file_read_cb(GObject* source_object, GAsyncResult* res, gpointer user_data) {
@@ -668,10 +675,7 @@ static void file_read_cb(GObject* source_object, GAsyncResult* res, gpointer use
 
     struct img_and_dims* info = (struct img_and_dims*) user_data;
 
-    printf("x: %i\r\n", info->x);
-    printf("y: %i\r\n", info->y);
-
-    gdk_pixbuf_new_from_stream_at_scale_async(stream, info->x, info->y, FALSE, NULL, image_loaded_cb, info->image);
+    gdk_pixbuf_new_from_stream_at_scale_async(stream, info->x, info->y, FALSE, NULL, image_loaded_cb, user_data);
 
     g_object_unref(stream);
 }
