@@ -10,7 +10,7 @@ SRC= $(SRCDIR)/main.c $(SRCDIR)/parser.c $(SRCDIR)/station_reader.c $(SRCDIR)/g-
 build: $(OBJ) $(SRCDIR)/rajio.h
 	$(CC) $(CFLAGS) -O2 $(OBJ) -o rajio $(LDLIBS) 
 
-$(OBJ): $(SRC) (SRCDIR)/rajio.h
+$(OBJ): $(SRC) $(SRCDIR)/rajio.h
 	$(CC) $(CFLAGS) -c $(SRC)
 
 .PHONY : clean
