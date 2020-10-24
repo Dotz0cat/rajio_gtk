@@ -621,13 +621,15 @@ GtkWidget* make_image_from_file(char* file, int x, int y) {
 }
 
 void change_station_playing_image(char* thumbnail) {
-    GdkPixbuf* pixbuf;
+    gtk_image_set_from_icon_name(GTK_IMAGE(station_image), "audio-x-generic", GTK_ICON_SIZE_BUTTON);
+    struct img_and_dims* info = malloc((sizeof(int)*2)+8);
 
-    pixbuf = gdk_pixbuf_new_from_file_at_scale(thumbnail, 50, 50, FALSE, NULL);
+    info->image = station_image;
+    info->x = 50;
+    info->y = 50;
 
-    gtk_image_set_from_pixbuf(GTK_IMAGE(station_image), pixbuf);
-
-    g_object_unref(pixbuf);
+    GFile* fp = g_file_new_for_uri(thumbnail);
+    g_file_read_async(fp, 1, NULL, file_read_cb, info);
 }
 
 GtkWidget* make_image_from_resource(const char* address, int x, int y) {
