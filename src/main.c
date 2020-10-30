@@ -6,7 +6,13 @@
 #pragma clang diagnostic pop
 
 //marcos
-#define sql "/home/seth/c/rajio_gtk_pack_test/stations"
+#ifndef stations_file
+    #define stations_file "/usr/share/share/rajio/stations"
+#endif
+
+#ifndef gtk_builder_file
+    #define gtk_builder_file "/usr/share/rajio/rajio_gtk_v2.glade"
+#endif
 
 //prototypes
 void add_station(GtkWidget* flowbox, char* station_name, char* image_file);
@@ -77,10 +83,10 @@ int main(int argc, char* argv[]) {
 
     bus = gst_element_get_bus(pipeline);
 
-    set_message_handlers(bus, sql);
+    set_message_handlers(bus, stations_file);
 
     builder = gtk_builder_new();
-    gtk_builder_add_from_file(builder, "rajio_gtk_v2.glade", NULL);
+    gtk_builder_add_from_file(builder, gtk_builder_file, NULL);
     window = GTK_WIDGET(gtk_builder_get_object(builder, "gWindow"));
     flow = GTK_WIDGET(gtk_builder_get_object(builder, "flowbox1"));
     station_image = GTK_WIDGET(gtk_builder_get_object(builder, "gStaationPlaying"));
@@ -90,7 +96,7 @@ int main(int argc, char* argv[]) {
     pause_button = GTK_WIDGET(gtk_builder_get_object(builder, "gPause"));
 
     //add the staion images and names to the flowbox
-    station_adder(sql, flow);
+    station_adder(stations_file, flow);
 
     //add a dioluge popup to the add station button
     GtkWidget* station_add;
@@ -311,7 +317,7 @@ static void button_clicked_cb(GtkWidget *widget, gpointer data) {
 
                 if (is_valid_url(address) == 0) {
                     num_of_addresses = 1;
-                    if (append_new_address(sql, (get_highest_id(sql)+1), address) != 0) {
+                    if (append_new_address(stations_file, (get_highest_id(stations_file)+1), address) != 0) {
                         fprintf(stderr, "There was a error adding a address to the table\r\n");
                     }
                 }
@@ -322,7 +328,7 @@ static void button_clicked_cb(GtkWidget *widget, gpointer data) {
             else {
                 //the use file button is toggled
                 const char* address = (const char*) gtk_entry_get_text(GTK_ENTRY(address_file_entry));
-                num_of_addresses = add_stations(address, sql);
+                num_of_addresses = add_stations(address, stations_file);
                 if (num_of_addresses <= 0) {
                     error_message_popup(diolouge, "There was a error parsing the file provided\r\nor the file was not valid");
                 }
@@ -332,7 +338,7 @@ static void button_clicked_cb(GtkWidget *widget, gpointer data) {
                 error_message_popup(diolouge, "There was a issue somewhere");
             }
 
-            if (append_new_station(sql, get_highest_id(sql)+1, name_value, thumbnail_path, num_of_addresses) != 0) {
+            if (append_new_station(stations_file, get_highest_id(stations_file)+1, name_value, thumbnail_path, num_of_addresses) != 0) {
                 error_message_popup(diolouge, "There was a error adding the station");
             }
         break;
@@ -502,27 +508,21 @@ static void error_message_popup(GtkWidget* parrent, char* error_message) {
 }
 
 int start_playing(int station_id) {
-    char* address = get_address(sql, station_id);
-
-    char address_stack[512];
-
-    strcpy(address_stack, address);
-
-    free(address);
+    char* address = get_address(stations_file, station_id);
 
     char* thumbnail;
 
-    thumbnail = read_station_thumbnail(sql, station_id);
+    thumbnail = read_station_thumbnail(stations_file, station_id);
 
     char* name;
 
-    name = read_station_name(sql, station_id);
+    name = read_station_name(stations_file, station_id);
 
     gst_element_set_state(pipeline, GST_STATE_READY);
 
-    if (is_valid_url(address_stack) == 0 && contains_a_pls(address_stack) == 0) {
+    if (is_valid_url(address) == 0 && contains_a_pls(address) == 0) {
             char* true_address;
-            true_address = get_address_from_pls_over_net(address_stack);
+            true_address = get_address_from_pls_over_net(address);
 
             if (is_valid_url(true_address) != 0) return -1;
 
@@ -531,9 +531,9 @@ int start_playing(int station_id) {
             free(true_address);
 
     }
-    else if (is_valid_url(address_stack) == 0) {
+    else if (is_valid_url(address) == 0) {
 
-        g_object_set(pipeline, "uri", address_stack, NULL);
+        g_object_set(pipeline, "uri", address, NULL);
 
     }
     else return -1;
@@ -546,6 +546,7 @@ int start_playing(int station_id) {
     change_station_playing_image(thumbnail);
     gtk_label_set_text(GTK_LABEL(station_name_label), name);
 
+    free(address);
     free(thumbnail);
     free(name);
 
@@ -577,11 +578,11 @@ static void play_button_clicked_cb(GtkWidget* widget, gpointer data) {
 
     char* thumbnail;
 
-    thumbnail = read_station_thumbnail(sql, most_recent_id);
+    thumbnail = read_station_thumbnail(stations_file, most_recent_id);
 
     char* name;
 
-    name = read_station_name(sql, most_recent_id);
+    name = read_station_name(stations_file, most_recent_id);
 
     gtk_widget_show(stop_button);
     gtk_widget_show(pause_button);
