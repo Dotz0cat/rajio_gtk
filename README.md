@@ -1,5 +1,5 @@
 # rajio_gtk
-A simple program made in c.
+A simple internet radio program made in c.
 
 ## using
 Launch application with command line or application launcher
@@ -28,7 +28,7 @@ May need to run the last command as root
 
 Now rajio will be installed
 
-## Lisence
-This project is released under the GNU Public Lisecne Version 3 or Later.
+## License
+This project is released under the GNU Public License Version 3 or Later.
 
 See COPYING for more details
