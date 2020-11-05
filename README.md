@@ -9,8 +9,15 @@ Select station that you want
 Listen
 
 ## Installation
-I plan to have packages made. I have a pkgbuild for arch. I hope to get it on the aur soon. 
-Installation is done with a makefile. 
+It is available on the AUR
+
+Find it under: 
+
+`rajio_gtk`
+
+More packages are coming
+
+If you don't use Arch you can install with the Makefile
 
 Step 1: 
 
