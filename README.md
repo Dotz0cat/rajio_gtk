@@ -19,6 +19,16 @@ More packages are coming
 
 If you don't use Arch you can install with the Makefile
 
+Dependencies:
+
+```
+GTK3
+GStreamer
+GStreaner-plugins-good
+Gstreamer-plugins-bad
+SQLite3
+```
+
 Step 1: 
 
 Download latest release from github 
