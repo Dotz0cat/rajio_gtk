@@ -26,11 +26,11 @@ This file is part of Rajio.
 
 //marcos
 #ifndef stations_file
-    #define stations_file "/usr/share/share/rajio/stations"
+    #define stations_file "/usr/local/share/rajio/stations"
 #endif
 
 #ifndef gtk_builder_file
-    #define gtk_builder_file "/usr/share/rajio/rajio_gtk_v2.glade"
+    #define gtk_builder_file "/usr/local/share/rajio/rajio_gtk_v2.glade"
 #endif
 
 //prototypes
@@ -505,9 +505,9 @@ static void error_message_popup(GtkWidget* parrent, char* error_message) {
     GtkWidget* label;
     GtkWidget* content_area;
 
-    //GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+    GtkDialogFlags flags = GTK_DIALOG_MODAL;
 
-    dialog = gtk_dialog_new_with_buttons("ERROR", GTK_WINDOW(parrent), NULL, "Ok", GTK_RESPONSE_NONE, NULL);
+    dialog = gtk_dialog_new_with_buttons("ERROR", GTK_WINDOW(parrent), flags, "Ok", GTK_RESPONSE_NONE, NULL);
 
     content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
 
