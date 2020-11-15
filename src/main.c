@@ -726,9 +726,25 @@ void localDB(void) {
     strcat(local_station_file, home);
     strcat(local_station_file, "/.config/rajio/local_stations");
 
-    printf("%s\r\n", local_station_file);
+    //printf("%s\r\n", local_station_file);
 
     if (local_exsits(local_station_file)==1) {
+        char* work_around = calloc(strlen(home)+8, 1);
+        strcat(work_around, home);
+        strcat(work_around, "/.config");
+
+
+        mkdir(work_around, 0777);
+        char* work_around2 = calloc(strlen(home)+15, 1);
+
+        strcat(work_around2, work_around);
+        strcat(work_around2, "/rajio");
+
+        mkdir(work_around2, 0777);
+
+        free(work_around2);
+        //free(work_around);
+
         if (makeDB(local_station_file)==1) {
             fprintf(stderr, "There was a error making: %s\r\n", local_station_file);
         }  

@@ -28,6 +28,7 @@ This file is part of Rajio.
 #pragma clang diagnostic pop
 #include <pwd.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
 extern int most_recent_id;
 extern GstElement* pipeline;

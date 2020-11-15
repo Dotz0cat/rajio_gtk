@@ -324,6 +324,9 @@ int makeDB(const char* file_name) {
 	int rc = sqlite3_open(file_name, &db);
 
 	if (rc != SQLITE_OK) {
+		fprintf(stderr, "SQLite3 error: %s\r\n", sqlite3_errmsg(db));
+		fprintf(stderr, "SQLITE3 error info: %i\r\n", sqlite3_system_errno(db));
+
 		sqlite3_close(db);
 
 		return 1;
