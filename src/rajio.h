@@ -19,12 +19,15 @@ This file is part of Rajio.
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <sqlite3.h>
 #include <glib-2.0/glib.h>
 #include <gstreamer-1.0/gst/gst.h>
 #pragma clang diagnostic ignored "-Weverything"
 #include <gtk/gtk.h>
 #pragma clang diagnostic pop
+#include <pwd.h>
+#include <sys/types.h>
 
 extern int most_recent_id;
 extern GstElement* pipeline;

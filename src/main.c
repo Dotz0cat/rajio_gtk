@@ -43,6 +43,7 @@ GtkWidget* make_image_from_file(char* file, int x, int y);
 void change_station_playing_image(char* thumbnail);
 GtkWidget* make_image_from_resource(const char* address, int x, int y);
 GInputStream* make_input_stream(const char* address);
+void localDB(void);
 
 //gtk callback prototypes
 static void destroy(GtkWidget *widget, gpointer data);
@@ -65,6 +66,8 @@ extern int append_new_station(char* file_name, int id, char* name, char* thumbna
 extern int append_new_address(char* file_name, int id, char* address);
 extern char* get_address(char* file_name, int id);
 extern void set_message_handlers(GstBus *bus, const char* sql_file);
+extern int local_exsits(const char* file_name);
+extern int makeDB(const char* file_name);
 
 //external parser prototypes
 extern int add_stations(char* file_name, char* sql_file);
@@ -83,6 +86,7 @@ static GtkWidget* pause_button;
 //add pause button
 int most_recent_id;
 GstElement* pipeline;
+char* local_station_file;
 
 int main(int argc, char* argv[]) {
 
@@ -113,6 +117,9 @@ int main(int argc, char* argv[]) {
     play_button = GTK_WIDGET(gtk_builder_get_object(builder, "gPlay"));
     stop_button = GTK_WIDGET(gtk_builder_get_object(builder, "gStop"));
     pause_button = GTK_WIDGET(gtk_builder_get_object(builder, "gPause"));
+
+    //check and make local db
+    localDB();
 
     //add the staion images and names to the flowbox
     station_adder(stations_file, flow);
@@ -700,4 +707,30 @@ static void file_read_cb(GObject* source_object, GAsyncResult* res, gpointer use
     gdk_pixbuf_new_from_stream_at_scale_async(stream, info->x, info->y, FALSE, NULL, image_loaded_cb, user_data);
 
     g_object_unref(stream);
+}
+
+void localDB(void) {
+    char* home = getenv("HOME");
+
+    if (home == NULL) {
+        uid_t uid = getuid();
+        struct passwd* pw = getpwuid(uid);
+        home = pw->pw_dir;
+    }
+
+    //who cares it makes more sense to use sizeof(char)
+    local_station_file = calloc(strlen(home)+30, 1);
+
+
+
+    strcat(local_station_file, home);
+    strcat(local_station_file, "/.config/rajio/local_stations");
+
+    printf("%s\r\n", local_station_file);
+
+    if (local_exsits(local_station_file)==1) {
+        if (makeDB(local_station_file)==1) {
+            fprintf(stderr, "There was a error making: %s\r\n", local_station_file);
+        }  
+    }
 }

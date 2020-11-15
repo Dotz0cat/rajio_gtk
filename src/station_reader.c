@@ -26,6 +26,8 @@ char* read_station_name(char* file_name, int id);
 char* read_station_thumbnail(char* file_name, int id);
 int get_highest_id(char* file_name);
 char* get_address(char* file_name, int id);
+int local_exsits(const char* file_name);
+int makeDB(const char* file_name);
 
 
 
@@ -305,4 +307,40 @@ char* get_address(char* file_name, int id) {
 	sqlite3_close(db);
 
 	return address;
+}
+
+int local_exsits(const char* file_name) {
+	if (access(file_name, F_OK)) {
+		//return 1 if not exsits
+		return 1;
+	}
+	//return 0 if exsits
+	return 0;
+}
+
+int makeDB(const char* file_name) {
+	sqlite3* db;
+
+	int rc = sqlite3_open(file_name, &db);
+
+	if (rc != SQLITE_OK) {
+		sqlite3_close(db);
+
+		return 1;
+	}
+
+	char* sql = "CREATE TABLE Stations (Id INT, Name TEXT, Thumbnail TEXT, Num_of_addresses INT);"
+					"CREATE TABLE Addresses (Id INT, Address TEXT);";
+
+	rc = sqlite3_exec(db, sql, NULL, NULL, NULL);
+
+	if (rc != SQLITE_OK) {
+		sqlite3_close(db);
+
+		return 1;
+	}
+
+	sqlite3_close(db);
+
+	return 0;
 }
