@@ -34,7 +34,7 @@ This file is part of Rajio.
 #endif
 
 //prototypes
-void add_station(GtkWidget* flowbox, char* station_name, char* image_file);
+void add_station(GtkWidget* flowbox, char* station_name, char* image_file, int id);
 void station_adder(char* file_name, GtkWidget* flow);
 static void error_message_popup(GtkWidget* parrent, char* error_message);
 int start_playing(int station_id);
@@ -44,6 +44,7 @@ void change_station_playing_image(char* thumbnail);
 GtkWidget* make_image_from_resource(const char* address, int x, int y);
 GInputStream* make_input_stream(const char* address);
 void localDB(void);
+void eos_changer(void);
 
 //gtk callback prototypes
 static void destroy(GtkWidget *widget, gpointer data);
@@ -65,7 +66,7 @@ extern char* read_station_thumbnail(char* file_name, int id);
 extern int append_new_station(char* file_name, int id, char* name, char* thumbnail, int num_of_addresses);
 extern int append_new_address(char* file_name, int id, char* address);
 extern char* get_address(char* file_name, int id);
-extern void set_message_handlers(GstBus *bus, const char* sql_file);
+extern void set_message_handlers(GstBus *bus);
 extern int local_exsits(const char* file_name);
 extern int makeDB(const char* file_name);
 
@@ -77,7 +78,7 @@ extern char* get_address_from_pls_over_net(char* pls_file);
 extern int genaric_regex(const char* string, const char* regex_string);
 
 //global variables
-static int station_number;
+//static int station_number;
 static GtkWidget* station_image;
 static GtkWidget* station_name_label;
 static GtkWidget* play_button;
@@ -106,7 +107,7 @@ int main(int argc, char* argv[]) {
 
     bus = gst_element_get_bus(pipeline);
 
-    set_message_handlers(bus, stations_file);
+    set_message_handlers(bus);
 
     builder = gtk_builder_new();
     gtk_builder_add_from_file(builder, gtk_builder_file, NULL);
@@ -133,7 +134,7 @@ int main(int argc, char* argv[]) {
     g_signal_connect(stop_button, "clicked", G_CALLBACK(stop_button_clicked_cb), (gpointer) window);
     g_signal_connect(pause_button, "clicked", G_CALLBACK(pause_button_clicked_cb), (gpointer) window);
 
-
+    //gtk_button_set_relief(GTK_BUTTON(station_add), GTK_RELIEF_NONE);
 
     //makes the window close
     g_signal_connect(window, "delete-event", G_CALLBACK (delete_event), NULL);
@@ -148,7 +149,7 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-void add_station(GtkWidget* flowbox, char* station_name, char* image_file) {
+void add_station(GtkWidget* flowbox, char* station_name, char* image_file, int id) {
     GtkWidget* grid;
 
     grid = gtk_grid_new();
@@ -170,26 +171,34 @@ void add_station(GtkWidget* flowbox, char* station_name, char* image_file) {
     gtk_grid_attach(GTK_GRID(grid), label, 0, 2, 3, 1);
 
     //wrap the grid in a event box
-    GtkWidget* event_box;
+    /*GtkWidget* event_box;
 
-    event_box = gtk_event_box_new();
+    event_box = gtk_event_box_new();*/
 
     char str[50];
-    sprintf(str, "%i", station_number);
+    sprintf(str, "%i", id);
 
-    gtk_widget_set_name(event_box, str);
+    //gtk_widget_set_name(event_box, str);
 
-    g_signal_connect(event_box, "button_press_event", G_CALLBACK(event_box_clicked_cb), NULL);
+    //g_signal_connect(event_box, "button_press_event", G_CALLBACK(event_box_clicked_cb), NULL);
 
-    gtk_container_add(GTK_CONTAINER(event_box), grid);
+    //gtk_container_add(GTK_CONTAINER(event_box), grid);
+
+    GtkWidget* button;
+
+    button = gtk_button_new();
+
+    gtk_widget_set_name(button, str);
+
+    g_signal_connect(button, "button_press_event", G_CALLBACK(event_box_clicked_cb), NULL);
+
+    gtk_container_add(GTK_CONTAINER(button), grid);
+
 
     //need to add some event handllers to the event box
 
     //add the event box to the flowbox
-    gtk_container_add(GTK_CONTAINER(flowbox), event_box);
-
-    //icremnt the station number
-    station_number++;
+    gtk_container_add(GTK_CONTAINER(flowbox), button);
 }
 
 void station_adder(char* file_name, GtkWidget* flow) {
@@ -198,10 +207,10 @@ void station_adder(char* file_name, GtkWidget* flow) {
     char* name;
     char* path;
 
-    for (station_number = 1; station_number < max_station+1;) {
-        name = read_station_name(file_name, station_number);
-        path = read_station_thumbnail(file_name, station_number);
-        add_station(flow, name, path);
+    for (int i = 1; i < max_station+1; i++) {
+        name = read_station_name(file_name, i);
+        path = read_station_thumbnail(file_name, i);
+        add_station(flow, name, path, i);
         free(name);
         free(path);
     }
@@ -748,5 +757,18 @@ void localDB(void) {
         if (makeDB(local_station_file)==1) {
             fprintf(stderr, "There was a error making: %s\r\n", local_station_file);
         }  
+    }
+}
+
+void eos_changer(void) {
+    if (most_recent_id == get_highest_id(stations_file)) {
+        most_recent_id = 1;
+    }
+    else {
+        most_recent_id++;
+    }
+
+    if (start_playing(most_recent_id) != 0) {
+        fprintf(stderr, "There was a error\r\n");
     }
 }
