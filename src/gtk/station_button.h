@@ -51,12 +51,7 @@ struct _GtkStationButton {
 struct _GtkStationButtonClass {
 	GtkButtonClass parent_class;
 
-	/*void (* pressed)  (GtkButton* button);
-  	void (* released) (GtkButton* button);
-  	void (* clicked)  (GtkButton* button);
-  	void (* enter)    (GtkButton* button);
-  	void (* leave)    (GtkButton* button);
-  	*/
+  	//void (* clicked)  (GtkButton* button);
 };
 
 GtkWidget* gtk_station_button_new();

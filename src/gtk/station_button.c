@@ -32,7 +32,7 @@ static GtkWidgetClass* parent_class = NULL;
 static void gtk_station_button_class_init(GtkStationButtonClass* class);
 static void gtk_station_button_init(GtkStationButton* station_button);
 
-G_DEFINE_TYPE(GtkStationButton, gtk_station_button, GTK_TYPE_STATION_BUTTON)
+G_DEFINE_TYPE(GtkStationButton, gtk_station_button, GTK_TYPE_BUTTON)
 
 
 
