@@ -23,6 +23,7 @@ This file is part of Rajio.
 #include <sqlite3.h>
 #include <glib-2.0/glib.h>
 #include <gstreamer-1.0/gst/gst.h>
+#pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Weverything"
 #include <gtk/gtk.h>
 #pragma clang diagnostic pop
@@ -30,7 +31,10 @@ This file is part of Rajio.
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include "gtk/station_button.h"
+
 extern int most_recent_id;
+extern CatStationFile most_recent_file;
 extern GstElement* pipeline;
 
 struct img_and_dims {
