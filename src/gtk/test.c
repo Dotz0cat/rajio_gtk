@@ -24,14 +24,22 @@ int main(int argc, char** argv) {
 
 	gtk_container_add(GTK_CONTAINER(window), box);
 
-	station_button = gtk_station_button_new();
+	station_button = cat_station_button_new();
 
 	gtk_container_add(GTK_CONTAINER(box), station_button);
+
+	GtkWidget* label = gtk_label_new("I am a label\r\nA child of this button");
+
+	gtk_container_add(GTK_CONTAINER(station_button), label);
+
+	cat_station_button_set_id(station_button, 5);
+	cat_station_button_set_id(station_button, 0);
+	printf("id: %i\r\n", cat_station_button_get_id(station_button));
 
 	g_signal_connect(window, "delete-event", G_CALLBACK (delete_event), NULL);
     g_signal_connect(window, "destroy", G_CALLBACK (destroy), NULL);
 
-    g_signal_connect(station_button, "clicked", G_CALLBACK(destroy), NULL);
+    g_signal_connect(GTK_BUTTON(station_button), "clicked", G_CALLBACK(destroy), NULL);
 
 	gtk_widget_show_all(window);
 

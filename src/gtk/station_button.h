@@ -17,8 +17,8 @@ This file is part of Rajio.
     along with Rajio.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef __GTK_STATION_BUTTON_H__
-#define __GTK_STATION_BUTTON_H__
+#ifndef __CAT_STATION_BUTTON_H__
+#define __CAT_STATION_BUTTON_H__
 
 #include <gdk/gdk.h>
 #pragma clang diagnostic ignored "-Weverything"
@@ -27,36 +27,42 @@ This file is part of Rajio.
 
 G_BEGIN_DECLS
 
-#define GTK_TYPE_STATION_BUTTON				(gtk_station_button_get_type())
-#define GTK_STATION_BUTTON(obj)				(G_TYPE_CHECK_INSTANCE_CAST((obj), GTK_TYPE_STATION_BUTTON, GtkStationButton))
-#define GTK_STATION_BUTTON_CLASS(klass) 	(G_TYPE_CHECK_CLASS_CAST((klass), GTK_STATION_BUTTON, GtkStationButtonClass))
-#define GTK_IS_STATION_BUTTON(obj)			(G_TYPE_CHECK_INSTANCE_TYPE((obj), GTK_TYPE_STATION_BUTTON))
-#define GTK_IS_STATION_BUTTON_CLASS(klass)	(G_TYPE_CHECK_CLASS_TYPE((klass), GTK_TYPE_STATION_BUTTON))
-#define GTK_STATION_BUTTON_GET_CLASS(obj)	(G_TYPE_INSTANCE_GET_CLASS((obj), GTK_TYPE_STATION_BUTTON, GTK_STATION_BUTTON_CLASS)
+#define CAT_TYPE_STATION_BUTTON				(cat_station_button_get_type())
+#define CAT_STATION_BUTTON(obj)				(G_TYPE_CHECK_INSTANCE_CAST((obj), CAT_TYPE_STATION_BUTTON, CatStationButton))
+#define CAT_STATION_BUTTON_CLASS(klass) 	(G_TYPE_CHECK_CLASS_CAST((klass), CAT_STATION_BUTTON, CatStationButtonClass))
+#define CAT_IS_STATION_BUTTON(obj)			(G_TYPE_CHECK_INSTANCE_TYPE((obj), CAT_TYPE_STATION_BUTTON))
+#define CAT_IS_STATION_BUTTON_CLASS(klass)	(G_TYPE_CHECK_CLASS_TYPE((klass), CAT_TYPE_STATION_BUTTON))
+#define CAT_STATION_BUTTON_GET_CLASS(obj)	(G_TYPE_INSTANCE_GET_CLASS((obj), CAT_TYPE_STATION_BUTTON, CAT_STATION_BUTTON_CLASS)
 
 
 
-typedef struct _GtkStationButton GtkStationButton;
-typedef struct _GtkStationButtonClass GtkStationButtonClass;
+typedef struct _CatStationButton CatStationButton;
+typedef struct _CatStationButtonClass CatStationButtonClass;
+typedef struct _CatStationButtonPrivate CatStationButtonPrivate;
 
-struct _GtkStationButton {
-	GtkWidget* button;
+typedef enum _CatStationFile CatStationFile;
 
-	GtkWidget* child;
+struct _CatStationButton {
+	GtkButton button;
 
-	guint station_id;
+	CatStationButtonPrivate* priv;
+	//guint station_id;
 	//enum here
+	//enum
 };
 
-struct _GtkStationButtonClass {
+struct _CatStationButtonClass {
 	GtkButtonClass parent_class;
 
   	//void (* clicked)  (GtkButton* button);
 };
 
-GtkWidget* gtk_station_button_new();
-//guint gtk_station_button_get_type(void);
+GtkWidget* cat_station_button_new(void);
+guint cat_station_button_get_id(CatStationButton* button);
+void cat_station_button_set_id(CatStationButton* button, guint station_id);
+CatStationFile cat_station_button_get_station_file(CatStationButton* button);
+void cat_station_button_set_station_file(CatStationButton* button, CatStationFile station_file);
 
 G_END_DECLS
 
-#endif /* __GTK_STATION_BUTTON_H__ */
+#endif /* __CAT_STATION_BUTTON_H__ */
