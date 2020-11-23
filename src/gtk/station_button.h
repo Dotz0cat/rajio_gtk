@@ -25,29 +25,21 @@ This file is part of Rajio.
 #include <gtk/gtk.h>
 #pragma clang diagnostic pop
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+G_BEGIN_DECLS
 
-/* 
- * --- Macros for conversion and type checking 
- */
-#define GTK_STATION_BUTTON(obj) \
-   GTK_CHECK_CAST (obj, gtk_station_button_get_type(), GtkStationButton)
-#define GTK_STATION_BUTTON_CLASS(klass) \
-   GTK_CHECK_CLASS_CAST (klass, gtk_station_button_get_type, GtkStationButton)
-#define GTK_IS_STATION_BUTTON(obj) \
-   GTK_CHECK_TYPE (obj, gtk_station_button_get_type())
+#define GTK_TYPE_STATION_BUTTON				(gtk_station_button_get_type())
+#define GTK_STATION_BUTTON(obj)				(G_TYPE_CHECK_INSTANCE_CAST((obj), GTK_TYPE_STATION_BUTTON, GtkStationButton))
+#define GTK_STATION_BUTTON_CLASS(klass) 	(G_TYPE_CHECK_CLASS_CAST((klass), GTK_STATION_BUTTON, GtkStationButtonClass))
+#define GTK_IS_STATION_BUTTON(obj)			(G_TYPE_CHECK_INSTANCE_TYPE((obj), GTK_TYPE_STATION_BUTTON))
+#define GTK_IS_STATION_BUTTON_CLASS(klass)	(G_TYPE_CHECK_CLASS_TYPE((klass), GTK_TYPE_STATION_BUTTON))
+#define GTK_STATION_BUTTON_GET_CLASS(obj)	(G_TYPE_INSTANCE_GET_CLASS((obj), GTK_TYPE_STATION_BUTTON, GTK_STATION_BUTTON_CLASS)
 
-/*
- * --- Defining data structures.
- */
+
 
 typedef struct _GtkStationButton GtkStationButton;
-
 typedef struct _GtkStationButtonClass GtkStationButtonClass;
 
-struct _stationButton {
+struct _GtkStationButton {
 	GtkWidget* button;
 
 	GtkWidget* child;
@@ -56,7 +48,7 @@ struct _stationButton {
 	//enum here
 };
 
-struct _StationButtonClass {
+struct _GtkStationButtonClass {
 	GtkButtonClass parent_class;
 
 	/*void (* pressed)  (GtkButton* button);
@@ -68,10 +60,8 @@ struct _StationButtonClass {
 };
 
 GtkWidget* gtk_station_button_new();
-guint gtk_station_button_get_type(void);
+//guint gtk_station_button_get_type(void);
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
+G_END_DECLS
 
 #endif /* __GTK_STATION_BUTTON_H__ */

@@ -32,26 +32,9 @@ static GtkWidgetClass* parent_class = NULL;
 static void gtk_station_button_class_init(GtkStationButtonClass* class);
 static void gtk_station_button_init(GtkStationButton* station_button);
 
-//static void gtk_station_button_destroy(GObject* obj);
+G_DEFINE_TYPE(GtkStationButton, gtk_station_button, GTK_TYPE_STATION_BUTTON)
 
-guint gtk_station_button_get_type(void) {
-    static guint widget_type = 0;
 
-    if (!widget_type) {
-        GTypeInfo widget_info {
-            "GtkStationButton",
-            sizeof(GtkStationButton),
-            sizeof(GtkStationButtonClass),
-            (GtkClassInitFunc) gtk_station_button_class_init,
-            (GtkObjectInitFunc) gtk_station_button_init,
-            (GtkArgSetFunc) NULL,
-            (GtkArgGetFunc) NULL
-        };
-
-        widget_type = gtk_type_unique(gtk_widget_get_type(), &widget_info);
-    }
-    return widget_type;
-}
 
 static void gtk_station_button_class_init(GtkStationButtonClass* class) {
     GObject* gobject_class;
@@ -72,7 +55,7 @@ static void gtk_station_button_init(GtkStationButton* button) {
 
     //inital values
 
-    button->button = NULL;
+    button->button = gtk_button_new();
 
     button->child = NULL;
 
@@ -80,5 +63,5 @@ static void gtk_station_button_init(GtkStationButton* button) {
 }
 
 GtkWidget* gtk_station_button_new() {
-    return g_object_new(gtk_station_button_get_type(), GTK_TYPE_BUTTON,  NULL);
+    return g_object_new(GTK_TYPE_STATION_BUTTON, NULL);
 }
