@@ -27,11 +27,6 @@ This file is part of Rajio.
 #pragma clang diagnostic pop
 #include "station_button.h"
 
-enum _CatStationFile {
-    SYSTEM,
-    LOCAL
-};
-
 struct _CatStationButtonPrivate {
     guint station_id;
 
@@ -79,7 +74,7 @@ guint cat_station_button_get_id(CatStationButton* button) {
 }
 
 void cat_station_button_set_id(CatStationButton* button, guint station_id) {
-    g_return_if_fail(station_id > 1);
+    g_return_if_fail(station_id > 0);
     button->priv->station_id = station_id;
 }
 

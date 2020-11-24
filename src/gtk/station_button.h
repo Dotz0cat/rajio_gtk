@@ -42,6 +42,11 @@ typedef struct _CatStationButtonPrivate CatStationButtonPrivate;
 
 typedef enum _CatStationFile CatStationFile;
 
+enum _CatStationFile {
+    SYSTEM,
+    LOCAL
+};
+
 struct _CatStationButton {
 	GtkButton button;
 
