@@ -147,10 +147,18 @@ char* read_station_name(char* file_name, int id) {
 
 	rc = sqlite3_step(stmt);
 
-	if (rc != SQLITE_ROW) {
+	/*if (rc != SQLITE_OK || rc != SQLITE_ROW) {
 		fprintf(stderr, "error: %s\r\n", sqlite3_errmsg(db));
 
 		sqlite3_close(db);
+	}*/
+
+	if (rc != SQLITE_OK) {
+		if (rc != SQLITE_ROW) {
+			fprintf(stderr, "error: %s\r\n", sqlite3_errmsg(db));
+
+			sqlite3_close(db);
+		}
 	}
 
 	sprintf(name, "%s", sqlite3_column_text(stmt, 0));
@@ -197,10 +205,18 @@ char* read_station_thumbnail(char* file_name, int id) {
 
 	rc = sqlite3_step(stmt);
 
-	if (rc != SQLITE_ROW) {
+	/*if (rc != SQLITE_OK || rc != SQLITE_ROW) {
 		fprintf(stderr, "error: %s\r\n", sqlite3_errmsg(db));
 
 		sqlite3_close(db);
+	}*/
+
+	if (rc != SQLITE_OK) {
+		if (rc != SQLITE_ROW) {
+			fprintf(stderr, "error: %s\r\n", sqlite3_errmsg(db));
+
+			sqlite3_close(db);
+		}
 	}
 
 	sprintf(thumbnail, "%s", sqlite3_column_text(stmt, 0));
@@ -244,10 +260,18 @@ int get_highest_id(char* file_name) {
 
 	rc = sqlite3_step(stmt);
 
-	if (rc != SQLITE_ROW) {
-		fprintf(stderr, "error: %s\r\n", sqlite3_errmsg(db));
+	/*if (rc != SQLITE_OK || rc != SQLITE_ROW) {
+		//fprintf(stderr, "error: %s\r\n", sqlite3_errmsg(db));
 
 		sqlite3_close(db);
+	}*/
+
+	if (rc != SQLITE_OK) {
+		if (rc != SQLITE_ROW) {
+			//fprintf(stderr, "error: %s\r\n", sqlite3_errmsg(db));
+
+			sqlite3_close(db);
+		}
 	}
 
 	highest = sqlite3_column_int(stmt, 0);
@@ -294,10 +318,18 @@ char* get_address(char* file_name, int id) {
 
 	rc = sqlite3_step(stmt);
 
-	if (rc != SQLITE_ROW) {
+	/*if (rc != SQLITE_OK || rc != SQLITE_ROW) {
 		fprintf(stderr, "error: %s\r\n", sqlite3_errmsg(db));
 
 		sqlite3_close(db);
+	}*/
+
+	if (rc != SQLITE_OK) {
+		if (rc != SQLITE_ROW) {
+			fprintf(stderr, "error: %s\r\n", sqlite3_errmsg(db));
+
+			sqlite3_close(db);
+		}
 	}
 
 	sprintf(address, "%s", sqlite3_column_text(stmt, 0));

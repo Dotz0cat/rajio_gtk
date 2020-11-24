@@ -125,6 +125,7 @@ int main(int argc, char* argv[]) {
 
     //add the staion images and names to the flowbox
     station_adder(stations_file, flow, SYSTEM);
+    station_adder(local_station_file, flow, LOCAL);
 
     //add a dioluge popup to the add station button
     GtkWidget* station_add;
@@ -160,7 +161,7 @@ void add_station(GtkWidget* flowbox, char* station_name, char* image_file, int i
 
     //make the gtkImage
     GtkWidget* image;
-    //image = make_image_from_file(image_file, 100, 100);
+
     image = make_image_from_resource(image_file, 100, 100);
 
     gtk_grid_attach(GTK_GRID(grid), image, 0, 0, 3, 2);
@@ -171,25 +172,9 @@ void add_station(GtkWidget* flowbox, char* station_name, char* image_file, int i
 
     gtk_grid_attach(GTK_GRID(grid), label, 0, 2, 3, 1);
 
-    //wrap the grid in a event box
-    /*GtkWidget* event_box;
-
-    event_box = gtk_event_box_new();*/
-
-    /*char str[50];
-    sprintf(str, "%i", id);*/
-
-    //gtk_widget_set_name(event_box, str);
-
-    //g_signal_connect(event_box, "button_press_event", G_CALLBACK(event_box_clicked_cb), NULL);
-
-    //gtk_container_add(GTK_CONTAINER(event_box), grid);
-
     GtkWidget* button;
 
     button = cat_station_button_new();
-
-    //gtk_widget_set_name(button, str);
 
     cat_station_button_set_id(button, id);
     cat_station_button_set_station_file(button, station_file);
@@ -198,10 +183,7 @@ void add_station(GtkWidget* flowbox, char* station_name, char* image_file, int i
 
     gtk_container_add(GTK_CONTAINER(button), grid);
 
-
-    //need to add some event handllers to the event box
-
-    //add the event box to the flowbox
+    //add the station button to the flowbox
     gtk_container_add(GTK_CONTAINER(flowbox), button);
 }
 
@@ -356,7 +338,7 @@ static void button_clicked_cb(GtkWidget *widget, gpointer data) {
 
                 if (is_valid_url(address) == 0) {
                     num_of_addresses = 1;
-                    if (append_new_address(stations_file, (get_highest_id(stations_file)+1), address) != 0) {
+                    if (append_new_address(local_station_file, get_highest_id(local_station_file)+1, address) != 0) {
                         fprintf(stderr, "There was a error adding a address to the table\r\n");
                     }
                 }
@@ -367,7 +349,7 @@ static void button_clicked_cb(GtkWidget *widget, gpointer data) {
             else {
                 //the use file button is toggled
                 const char* address = (const char*) gtk_entry_get_text(GTK_ENTRY(address_file_entry));
-                num_of_addresses = add_stations(address, stations_file);
+                num_of_addresses = add_stations(address, local_station_file);
                 if (num_of_addresses <= 0) {
                     error_message_popup(diolouge, "There was a error parsing the file provided\r\nor the file was not valid");
                 }
@@ -377,9 +359,32 @@ static void button_clicked_cb(GtkWidget *widget, gpointer data) {
                 error_message_popup(diolouge, "There was a issue somewhere");
             }
 
-            if (append_new_station(stations_file, get_highest_id(stations_file)+1, name_value, thumbnail_path, num_of_addresses) != 0) {
+            if (append_new_station(local_station_file, get_highest_id(local_station_file)+1, name_value, thumbnail_path, num_of_addresses) != 0) {
                 error_message_popup(diolouge, "There was a error adding the station");
             }
+
+            /*GtkWidget* scolled;
+
+            GList* list = gtk_container_get_children(GTK_CONTAINER(data));
+
+            if (g_ascii_strcasecmp(gtk_widget_get_name((GtkWidget*) list->data), "gScroll") == 0) {
+                scrolled = (GtkWidget*) list->data;
+            }
+            else {
+                while((list = g_list_next(list)) != NULL) {
+                    if (g_ascii_strcasecmp(gtk_widget_get_name((GtkWidget*) list->data), "gScroll") == 0) {
+                        scrolled = (GtkWidget*) list->data;
+                    }
+
+                    if (scrolled != NULL) break;
+                }
+            }
+
+            GtkWidget* view = gtk_bin_get_child(GTK_BIN(scrolled));
+
+
+            add_station(gtk_bin_get_child(GTK_BIN(view)))*/
+
         break;
         default:
 
@@ -389,8 +394,11 @@ static void button_clicked_cb(GtkWidget *widget, gpointer data) {
 }
 
 static void event_box_clicked_cb(GtkWidget* widget, gpointer data) {
-    int id = cat_station_button_get_id(CAT_STATION_BUTTON(widget));
-    CatStationFile file = cat_station_button_get_station_file(CAT_STATION_BUTTON(widget));
+    //int id = cat_station_button_get_id(CAT_STATION_BUTTON(widget));
+    //CatStationFile file = cat_station_button_get_station_file(CAT_STATION_BUTTON(widget));
+
+    int id = cat_station_button_get_id(widget);
+    CatStationFile file = cat_station_button_get_station_file(widget);
 
     most_recent_id = id;
     most_recent_file = file;
