@@ -363,27 +363,29 @@ static void button_clicked_cb(GtkWidget *widget, gpointer data) {
                 error_message_popup(diolouge, "There was a error adding the station");
             }
 
-            /*GtkWidget* scolled;
+            GtkWidget* scrolled;
+
+            //GtkWidget* parent = GTK_WIDGET(data);
 
             GList* list = gtk_container_get_children(GTK_CONTAINER(data));
 
-            if (g_ascii_strcasecmp(gtk_widget_get_name((GtkWidget*) list->data), "gScroll") == 0) {
-                scrolled = (GtkWidget*) list->data;
+            if (GTK_IS_SCROLLED_WINDOW(list->data)) {
+                scrolled = GTK_WIDGET(list->data);
             }
             else {
                 while((list = g_list_next(list)) != NULL) {
-                    if (g_ascii_strcasecmp(gtk_widget_get_name((GtkWidget*) list->data), "gScroll") == 0) {
-                        scrolled = (GtkWidget*) list->data;
+                    //g_ascii_strcasecmp(gtk_widget_get_name((GtkWidget*) list->data), "gScroll") == 0
+                    if (GTK_IS_SCROLLED_WINDOW(list->data)) {
+                        scrolled = GTK_WIDGET(list->data);
+                        break;
                     }
-
-                    if (scrolled != NULL) break;
                 }
             }
 
             GtkWidget* view = gtk_bin_get_child(GTK_BIN(scrolled));
 
 
-            add_station(gtk_bin_get_child(GTK_BIN(view)))*/
+            add_station(gtk_bin_get_child(GTK_BIN(view)), name_value, thumbnail_path, get_highest_id(local_station_file), LOCAL);
 
         break;
         default:
@@ -394,9 +396,6 @@ static void button_clicked_cb(GtkWidget *widget, gpointer data) {
 }
 
 static void event_box_clicked_cb(GtkWidget* widget, gpointer data) {
-    //int id = cat_station_button_get_id(CAT_STATION_BUTTON(widget));
-    //CatStationFile file = cat_station_button_get_station_file(CAT_STATION_BUTTON(widget));
-
     int id = cat_station_button_get_id(widget);
     CatStationFile file = cat_station_button_get_station_file(widget);
 
