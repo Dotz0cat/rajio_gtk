@@ -97,7 +97,7 @@ int m3u_parser(char* file_name, char* sql_file) {
 	//old regex [(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)
 	//tried ^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$ 
 
-	error_num = regcomp(&regex, "^\\(http\\|ftp\\|https\\):\\/\\/\\(www\\.\\)\\?[a-z0-9A-z\\.:]\\{2,256\\}", REG_ICASE);
+	error_num = regcomp(&regex, "^\\(http\\|ftp\\|https\\|mms\\):\\/\\/\\(www\\.\\)\\?[a-z0-9A-z\\.:]\\{2,256\\}", REG_ICASE);
 	if (error_num) {
 		regerror(error_num, &regex, err_msg, sizeof(err_msg));
 		fprintf(stderr, "error doing regex: %s\n", err_msg);
@@ -175,10 +175,11 @@ int pls_parser(char* file_name, char* sql_file) {
 	regex_t http;
 	regex_t https;
 	regex_t ftp;
+	regex_t mms;
 	int error_num;
 	char err_msg[256];
 
-	error_num = regcomp(&regex, "\\(http\\|ftp\\|https\\):\\/\\/\\(www\\.\\)\\?[a-z0-9A-z\\.:]\\{2,256\\}", REG_ICASE);
+	error_num = regcomp(&regex, "\\(http\\|ftp\\|https\\|mms\\):\\/\\/\\(www\\.\\)\\?[a-z0-9A-z\\.:]\\{2,256\\}", REG_ICASE);
 	if (error_num) {
 		regerror(error_num, &regex, err_msg, sizeof(err_msg));
 		fprintf(stderr, "error doing regex: %s\n", err_msg);
@@ -241,6 +242,20 @@ int pls_parser(char* file_name, char* sql_file) {
 		return -1;
 	}
 
+	error_num = regcomp(&mms, "mms:\\/\\/", REG_ICASE);
+	if (error_num) {
+		regerror(error_num, &header_regex, err_msg, sizeof(err_msg));
+		fprintf(stderr, "error doing regex: %s\n", err_msg);
+		regfree(&regex);
+		regfree(&file_regex);
+		regfree(&header_regex);
+		regfree(&http);
+		regfree(&https);
+		regfree(&ftp);
+		fclose(fp);
+		return -1;
+	}
+
 	int header_found = 0;
 
 	fgets(str, (int) sizeof(str), fp);
@@ -269,6 +284,7 @@ int pls_parser(char* file_name, char* sql_file) {
 							regfree(&http);
 							regfree(&https);
 							regfree(&ftp);
+							regfree(&mms);
 							fclose(fp);
 							return -1;
 						}
@@ -285,6 +301,7 @@ int pls_parser(char* file_name, char* sql_file) {
 							regfree(&http);
 							regfree(&https);
 							regfree(&ftp);
+							regfree(&mms);
 							fclose(fp);
 							return -1;
 						}
@@ -301,6 +318,24 @@ int pls_parser(char* file_name, char* sql_file) {
 							regfree(&http);
 							regfree(&https);
 							regfree(&ftp);
+							regfree(&mms);
+							fclose(fp);
+							return -1;
+						}
+					}
+					else if (regexec(&mms, str, 0, NULL, 0) == 0) {
+						char* string;
+						string = strstr(str, "mms");
+						addresses++;
+						if (append_new_address(sql_file, id, string) != 0) {
+							fprintf(stderr, "there was a error appending %s to sql file\r\n", str);
+							regfree(&regex);
+							regfree(&file_regex);
+							regfree(&header_regex);
+							regfree(&http);
+							regfree(&https);
+							regfree(&ftp);
+							regfree(&mms);
 							fclose(fp);
 							return -1;
 						}
@@ -316,6 +351,7 @@ int pls_parser(char* file_name, char* sql_file) {
 	regfree(&http);
 	regfree(&https);
 	regfree(&ftp);
+	regfree(&mms);
 
 	fclose(fp);
 
@@ -376,7 +412,7 @@ char* get_address_from_pls_over_net(char* pls_file) {
 
 	if (!stream) {
 		g_object_unref(fp);
-		return "opps";
+		return "";
 	}
 
 	GDataInputStream* data_stream = g_data_input_stream_new(G_INPUT_STREAM(stream));
@@ -387,6 +423,7 @@ char* get_address_from_pls_over_net(char* pls_file) {
 	regex_t http;
 	regex_t https;
 	regex_t ftp;
+	regex_t mms;
 	int error_num;
 	char err_msg[256];
 
@@ -415,7 +452,7 @@ char* get_address_from_pls_over_net(char* pls_file) {
 		g_object_unref(stream);
 		g_object_unref(fp);
 
-		return "opps";
+		return "";
 	}
 
 	error_num = regcomp(&file_regex, str, REG_ICASE);
@@ -425,7 +462,7 @@ char* get_address_from_pls_over_net(char* pls_file) {
 		regfree(&regex);
 		g_object_unref(stream);
 		g_object_unref(fp);
-		return "oops";
+		return "";
 	}
 
 	error_num = regcomp(&header_regex, "\\[playlist\\]", REG_ICASE);
@@ -436,7 +473,7 @@ char* get_address_from_pls_over_net(char* pls_file) {
 		regfree(&file_regex);
 		g_object_unref(stream);
 		g_object_unref(fp);
-		return "opps";
+		return "";
 	}
 
 	error_num = regcomp(&http, "http:\\/\\/", REG_ICASE);
@@ -448,7 +485,7 @@ char* get_address_from_pls_over_net(char* pls_file) {
 		regfree(&header_regex);
 		g_object_unref(stream);
 		g_object_unref(fp);
-		return "opps";
+		return "";
 	}
 
 	error_num = regcomp(&https, "https:\\/\\/", REG_ICASE);
@@ -461,7 +498,7 @@ char* get_address_from_pls_over_net(char* pls_file) {
 		regfree(&http);
 		g_object_unref(stream);
 		g_object_unref(fp);
-		return "oops";
+		return "";
 	}
 
 	error_num = regcomp(&ftp, "ftp:\\/\\/", REG_ICASE);
@@ -475,7 +512,22 @@ char* get_address_from_pls_over_net(char* pls_file) {
 		regfree(&https);
 		g_object_unref(stream);
 		g_object_unref(fp);
-		return "oops";
+		return "";
+	}
+
+	error_num = regcomp(&mms, "mms:\\/\\/", REG_ICASE);
+	if (error_num) {
+		regerror(error_num, &header_regex, err_msg, sizeof(err_msg));
+		fprintf(stderr, "error doing regex: %s\n", err_msg);
+		regfree(&regex);
+		regfree(&file_regex);
+		regfree(&header_regex);
+		regfree(&http);
+		regfree(&https);
+		regfree(&ftp);
+		g_object_unref(stream);
+		g_object_unref(fp);
+		return "";
 	}
 
 	char* line;
@@ -515,6 +567,10 @@ char* get_address_from_pls_over_net(char* pls_file) {
 					}
 					else if (regexec(&ftp, line, 0, NULL, 0) == 0) {
 						string = strstr(line, "ftp");
+						break;
+					}
+					else if (regexec(&mms, line, 0, NULL, 0) == 0) {
+						string = strstr(line, "mms");
 						break;
 					}
 				}

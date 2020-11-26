@@ -248,8 +248,8 @@ static void button_clicked_cb(GtkWidget *widget, gpointer data) {
     GtkWidget* address_manual_entry;
 
     //useful for later
-    const char* name_value;
-    const char* thumbnail_path;
+    char* name_value;
+    char* thumbnail_path;
     int num_of_addresses;
 
     //make for name and add to grid
@@ -325,21 +325,37 @@ static void button_clicked_cb(GtkWidget *widget, gpointer data) {
     switch (response) {
         case(GTK_RESPONSE_ACCEPT):
             //get info and make call to append_new_station() and append_new_address
-            name_value = (const char*) gtk_entry_get_text(GTK_ENTRY(name_entry));
+            name_value = gtk_editable_get_chars(GTK_EDITABLE(name_entry), 0, -1);
             if (strcmp(name_value, "") == 0) {
                 error_message_popup(diolouge, "Please enter a valid name");
+                break;
             }
 
-            thumbnail_path = (const char*) gtk_entry_get_text(GTK_ENTRY(thumbnail_entry));
-            if (strcmp(thumbnail_path, "") == 0) {
+            char* thumbnail_holder;
+
+            thumbnail_holder = gtk_editable_get_chars(GTK_EDITABLE(thumbnail_entry), 0, -1);
+            if (strcmp(thumbnail_holder, "") == 0) {
                 error_message_popup(diolouge, "Please enter a valid thumbnail path");
+                break;
             }
+            
+            if (genaric_regex(thumbnail_holder, "^\\(http\\|https\\|file\\|ftp\\):\\/\\/") != 0) {
+                //assume it is a file
+                thumbnail_path = calloc(strlen(thumbnail_holder)+8, 1);
+                strcat(thumbnail_path, "file://");
+                strcat(thumbnail_path, thumbnail_holder);
+            }
+            else {
+                thumbnail_path = calloc(strlen(thumbnail_holder), 1);
+                strcpy(thumbnail_path, thumbnail_holder);
+            }
+            g_free(thumbnail_holder);
 
             num_of_addresses = 0;
 
             if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(radio_enter_manually))) {
                 
-                const char* address = (const char*) gtk_entry_get_text(GTK_ENTRY(address_manual_entry));
+                char* address = gtk_editable_get_chars(GTK_EDITABLE(address_manual_entry), 0, -1);
 
                 if (is_valid_url(address) == 0) {
                     num_of_addresses = 1;
@@ -349,15 +365,19 @@ static void button_clicked_cb(GtkWidget *widget, gpointer data) {
                 }
                 else {
                     error_message_popup(diolouge, "The address entered was not valid");
+                    break;
                 }
+                g_free(address);
             }
             else {
                 //the use file button is toggled
-                const char* address = (const char*) gtk_entry_get_text(GTK_ENTRY(address_file_entry));
+                char* address = gtk_editable_get_chars(GTK_EDITABLE(address_file_entry), 0, -1);
                 num_of_addresses = add_stations(address, local_station_file);
                 if (num_of_addresses <= 0) {
                     error_message_popup(diolouge, "There was a error parsing the file provided\r\nor the file was not valid");
+                    break;
                 }
+                g_free(address);
             }
 
             if (num_of_addresses <= 0) {
@@ -405,11 +425,14 @@ static void button_clicked_cb(GtkWidget *widget, gpointer data) {
 
             add_station(gtk_bin_get_child(GTK_BIN(view)), name_value, thumbnail_path, get_highest_id(local_station_file), LOCAL);
 
+            g_free(name_value);
+            free(thumbnail_path);
         break;
         default:
 
         break;
     }
+    
     gtk_widget_destroy(diolouge);
 }
 
@@ -480,7 +503,7 @@ static void file_chooser_thumbnail_clicked_cb(GtkWidget *widget, gpointer parren
 
         chooser = GTK_FILE_CHOOSER(dialog);
 
-        filename = gtk_file_chooser_get_filename(chooser);
+        filename = gtk_file_chooser_get_uri(chooser);
 
         gtk_entry_set_text(GTK_ENTRY(entry), filename);
 
