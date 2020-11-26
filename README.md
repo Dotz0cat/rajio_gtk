@@ -22,7 +22,6 @@ If you don't use Arch you can install with the Makefile
 Dependencies:
 
 ```
-Clang
 GTK3
 GStreamer
 GStreaner-plugins-good

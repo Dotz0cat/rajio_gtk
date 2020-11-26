@@ -390,7 +390,7 @@ char* get_address_from_pls_over_net(char* pls_file) {
 	int error_num;
 	char err_msg[256];
 
-	char str[256];
+	char str[256] = "";
 
 	int tmp;
 

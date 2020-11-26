@@ -26,23 +26,25 @@ This file is part of Rajio.
 
 //marcos
 #ifndef stations_file
-    #define stations_file "/usr/share/share/rajio/stations"
+    #define stations_file "/usr/local/share/rajio/stations"
 #endif
 
 #ifndef gtk_builder_file
-    #define gtk_builder_file "/usr/share/rajio/rajio_gtk_v2.glade"
+    #define gtk_builder_file "/usr/local/share/rajio/rajio_gtk_v2.glade"
 #endif
 
 //prototypes
-void add_station(GtkWidget* flowbox, char* station_name, char* image_file);
-void station_adder(char* file_name, GtkWidget* flow);
+void add_station(GtkWidget* flowbox, char* station_name, char* image_file, int id, CatStationFile station_file);
+void station_adder(char* file_name, GtkWidget* flow, CatStationFile station_file);
 static void error_message_popup(GtkWidget* parrent, char* error_message);
-int start_playing(int station_id);
+int start_playing(int station_id, CatStationFile file);
 int stop_playing(void);
-GtkWidget* make_image_from_file(char* file, int x, int y);
 void change_station_playing_image(char* thumbnail);
 GtkWidget* make_image_from_resource(const char* address, int x, int y);
 GInputStream* make_input_stream(const char* address);
+void localDB(void);
+void eos_changer(void);
+int start_playing_with_reroll(int station_id, int reroll, CatStationFile file);
 
 //gtk callback prototypes
 static void destroy(GtkWidget *widget, gpointer data);
@@ -64,7 +66,11 @@ extern char* read_station_thumbnail(char* file_name, int id);
 extern int append_new_station(char* file_name, int id, char* name, char* thumbnail, int num_of_addresses);
 extern int append_new_address(char* file_name, int id, char* address);
 extern char* get_address(char* file_name, int id);
-extern void set_message_handlers(GstBus *bus, const char* sql_file);
+extern void set_message_handlers(GstBus* bus);
+extern int local_exsits(const char* file_name);
+extern int makeDB(const char* file_name);
+extern char* address_reroll(const char* file_name, int station_id, int reroll);
+extern int get_num_of_addresses(const char* file_name, int id);
 
 //external parser prototypes
 extern int add_stations(char* file_name, char* sql_file);
@@ -74,7 +80,7 @@ extern char* get_address_from_pls_over_net(char* pls_file);
 extern int genaric_regex(const char* string, const char* regex_string);
 
 //global variables
-static int station_number;
+//static int station_number;
 static GtkWidget* station_image;
 static GtkWidget* station_name_label;
 static GtkWidget* play_button;
@@ -82,7 +88,10 @@ static GtkWidget* stop_button;
 static GtkWidget* pause_button;
 //add pause button
 int most_recent_id;
+CatStationFile most_recent_file;
+int most_recent_reroll;
 GstElement* pipeline;
+char* local_station_file;
 
 int main(int argc, char* argv[]) {
 
@@ -102,7 +111,7 @@ int main(int argc, char* argv[]) {
 
     bus = gst_element_get_bus(pipeline);
 
-    set_message_handlers(bus, stations_file);
+    set_message_handlers(bus);
 
     builder = gtk_builder_new();
     gtk_builder_add_from_file(builder, gtk_builder_file, NULL);
@@ -114,8 +123,12 @@ int main(int argc, char* argv[]) {
     stop_button = GTK_WIDGET(gtk_builder_get_object(builder, "gStop"));
     pause_button = GTK_WIDGET(gtk_builder_get_object(builder, "gPause"));
 
+    //check and make local db
+    localDB();
+
     //add the staion images and names to the flowbox
-    station_adder(stations_file, flow);
+    station_adder(stations_file, flow, SYSTEM);
+    station_adder(local_station_file, flow, LOCAL);
 
     //add a dioluge popup to the add station button
     GtkWidget* station_add;
@@ -126,7 +139,7 @@ int main(int argc, char* argv[]) {
     g_signal_connect(stop_button, "clicked", G_CALLBACK(stop_button_clicked_cb), (gpointer) window);
     g_signal_connect(pause_button, "clicked", G_CALLBACK(pause_button_clicked_cb), (gpointer) window);
 
-
+    //gtk_button_set_relief(GTK_BUTTON(station_add), GTK_RELIEF_NONE);
 
     //makes the window close
     g_signal_connect(window, "delete-event", G_CALLBACK (delete_event), NULL);
@@ -141,7 +154,7 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-void add_station(GtkWidget* flowbox, char* station_name, char* image_file) {
+void add_station(GtkWidget* flowbox, char* station_name, char* image_file, int id, CatStationFile station_file) {
     GtkWidget* grid;
 
     grid = gtk_grid_new();
@@ -151,7 +164,7 @@ void add_station(GtkWidget* flowbox, char* station_name, char* image_file) {
 
     //make the gtkImage
     GtkWidget* image;
-    //image = make_image_from_file(image_file, 100, 100);
+
     image = make_image_from_resource(image_file, 100, 100);
 
     gtk_grid_attach(GTK_GRID(grid), image, 0, 0, 3, 2);
@@ -162,39 +175,33 @@ void add_station(GtkWidget* flowbox, char* station_name, char* image_file) {
 
     gtk_grid_attach(GTK_GRID(grid), label, 0, 2, 3, 1);
 
-    //wrap the grid in a event box
-    GtkWidget* event_box;
+    GtkWidget* button;
 
-    event_box = gtk_event_box_new();
+    button = cat_station_button_new();
 
-    char str[50];
-    sprintf(str, "%i", station_number);
+    cat_station_button_set_id(button, id);
+    cat_station_button_set_station_file(button, station_file);
 
-    gtk_widget_set_name(event_box, str);
+    g_signal_connect(GTK_BUTTON(button), "button_press_event", G_CALLBACK(event_box_clicked_cb), NULL);
 
-    g_signal_connect(event_box, "button_press_event", G_CALLBACK(event_box_clicked_cb), NULL);
+    gtk_container_add(GTK_CONTAINER(button), grid);
 
-    gtk_container_add(GTK_CONTAINER(event_box), grid);
+    //add the station button to the flowbox
+    gtk_container_add(GTK_CONTAINER(flowbox), button);
 
-    //need to add some event handllers to the event box
-
-    //add the event box to the flowbox
-    gtk_container_add(GTK_CONTAINER(flowbox), event_box);
-
-    //icremnt the station number
-    station_number++;
+    gtk_widget_show_all(button);
 }
 
-void station_adder(char* file_name, GtkWidget* flow) {
+void station_adder(char* file_name, GtkWidget* flow, CatStationFile station_file) {
     int max_station = get_highest_id(file_name);
 
     char* name;
     char* path;
 
-    for (station_number = 1; station_number < max_station+1;) {
-        name = read_station_name(file_name, station_number);
-        path = read_station_thumbnail(file_name, station_number);
-        add_station(flow, name, path);
+    for (int i = 1; i < max_station+1; i++) {
+        name = read_station_name(file_name, i);
+        path = read_station_thumbnail(file_name, i);
+        add_station(flow, name, path, i, station_file);
         free(name);
         free(path);
     }
@@ -336,7 +343,7 @@ static void button_clicked_cb(GtkWidget *widget, gpointer data) {
 
                 if (is_valid_url(address) == 0) {
                     num_of_addresses = 1;
-                    if (append_new_address(stations_file, (get_highest_id(stations_file)+1), address) != 0) {
+                    if (append_new_address(local_station_file, get_highest_id(local_station_file)+1, address) != 0) {
                         fprintf(stderr, "There was a error adding a address to the table\r\n");
                     }
                 }
@@ -347,7 +354,7 @@ static void button_clicked_cb(GtkWidget *widget, gpointer data) {
             else {
                 //the use file button is toggled
                 const char* address = (const char*) gtk_entry_get_text(GTK_ENTRY(address_file_entry));
-                num_of_addresses = add_stations(address, stations_file);
+                num_of_addresses = add_stations(address, local_station_file);
                 if (num_of_addresses <= 0) {
                     error_message_popup(diolouge, "There was a error parsing the file provided\r\nor the file was not valid");
                 }
@@ -357,9 +364,47 @@ static void button_clicked_cb(GtkWidget *widget, gpointer data) {
                 error_message_popup(diolouge, "There was a issue somewhere");
             }
 
-            if (append_new_station(stations_file, get_highest_id(stations_file)+1, name_value, thumbnail_path, num_of_addresses) != 0) {
+            if (append_new_station(local_station_file, get_highest_id(local_station_file)+1, name_value, thumbnail_path, num_of_addresses) != 0) {
                 error_message_popup(diolouge, "There was a error adding the station");
             }
+
+            GtkWidget* fixed;
+
+            GList* list = gtk_container_get_children(GTK_CONTAINER(data));
+
+            if (GTK_IS_FIXED(list->data)) {
+                fixed = GTK_WIDGET(list->data);
+            }
+            else {
+                while((list = g_list_next(list)) != NULL) {
+                    if (GTK_IS_FIXED(list->data)) {
+                        fixed = GTK_WIDGET(list->data);
+                        break;
+                    }
+                }
+            }
+
+            GtkWidget* scrolled;
+
+            GList* list2 = gtk_container_get_children(GTK_CONTAINER(fixed));
+
+            if (GTK_IS_SCROLLED_WINDOW(list2->data)) {
+                scrolled = GTK_WIDGET(list2->data);
+            }
+            else {
+                while((list2 = g_list_next(list2)) != NULL) {
+                    if (GTK_IS_SCROLLED_WINDOW(list2->data)) {
+                        scrolled = GTK_WIDGET(list2->data);
+                        break;
+                    }
+                }
+            }
+
+            GtkWidget* view = gtk_bin_get_child(GTK_BIN(scrolled));
+
+
+            add_station(gtk_bin_get_child(GTK_BIN(view)), name_value, thumbnail_path, get_highest_id(local_station_file), LOCAL);
+
         break;
         default:
 
@@ -368,13 +413,12 @@ static void button_clicked_cb(GtkWidget *widget, gpointer data) {
     gtk_widget_destroy(diolouge);
 }
 
-static void event_box_clicked_cb(GtkWidget *widget, gpointer data) {
-    char* id;
-    id = gtk_widget_get_name(widget);
+static void event_box_clicked_cb(GtkWidget* widget, gpointer data) {
+    int id = cat_station_button_get_id(widget);
+    CatStationFile file = cat_station_button_get_station_file(widget);
 
-    int id_num = atoi(id);
-
-    most_recent_id = id_num;
+    most_recent_id = id;
+    most_recent_file = file;
 
     //get the gtk window
     GtkWidget* flow_child = gtk_widget_get_parent(widget);
@@ -384,7 +428,7 @@ static void event_box_clicked_cb(GtkWidget *widget, gpointer data) {
     GtkWidget* fixed = gtk_widget_get_parent(scroll);
     GtkWidget* window = gtk_widget_get_parent(fixed);
 
-    if (start_playing(id_num) != 0) {
+    if (start_playing(id, file) != 0) {
         error_message_popup(window, "There was a error somewhere");
         return;
     }
@@ -505,9 +549,9 @@ static void error_message_popup(GtkWidget* parrent, char* error_message) {
     GtkWidget* label;
     GtkWidget* content_area;
 
-    //GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+    GtkDialogFlags flags = GTK_DIALOG_MODAL;
 
-    dialog = gtk_dialog_new_with_buttons("ERROR", GTK_WINDOW(parrent), NULL, "Ok", GTK_RESPONSE_NONE, NULL);
+    dialog = gtk_dialog_new_with_buttons("ERROR", GTK_WINDOW(parrent), flags, "Ok", GTK_RESPONSE_NONE, NULL);
 
     content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
 
@@ -526,16 +570,29 @@ static void error_message_popup(GtkWidget* parrent, char* error_message) {
 
 }
 
-int start_playing(int station_id) {
-    char* address = get_address(stations_file, station_id);
+int start_playing(int station_id, CatStationFile file) {
+    char* file_name = stations_file;
+    switch (file) {
+        case SYSTEM:
+            file_name = stations_file;
+            break;
+        case LOCAL:
+            file_name = local_station_file;
+            break;
+        default:
+            fprintf(stderr, "Something went wrong\r\n");
+            break;
+    }
+
+    char* address = get_address(file_name, station_id);
 
     char* thumbnail;
 
-    thumbnail = read_station_thumbnail(stations_file, station_id);
+    thumbnail = read_station_thumbnail(file_name, station_id);
 
     char* name;
 
-    name = read_station_name(stations_file, station_id);
+    name = read_station_name(file_name, station_id);
 
     gst_element_set_state(pipeline, GST_STATE_READY);
 
@@ -556,6 +613,8 @@ int start_playing(int station_id) {
 
     }
     else return -1;
+
+    most_recent_reroll = 1;
 
     gst_element_set_state(pipeline, GST_STATE_PLAYING);
 
@@ -592,16 +651,28 @@ static void stop_button_clicked_cb(GtkWidget* widget, gpointer data) {
 }
 
 static void play_button_clicked_cb(GtkWidget* widget, gpointer data) {
+    char* file_name = stations_file;
+    switch (most_recent_file) {
+        case SYSTEM:
+            file_name = stations_file;
+            break;
+        case LOCAL:
+            file_name = local_station_file;
+            break;
+        default:
+            fprintf(stderr, "Something went wrong\r\n");
+            break;
+    }
 
     gst_element_set_state(pipeline, GST_STATE_PLAYING);
 
     char* thumbnail;
 
-    thumbnail = read_station_thumbnail(stations_file, most_recent_id);
+    thumbnail = read_station_thumbnail(file_name, most_recent_id);
 
     char* name;
 
-    name = read_station_name(stations_file, most_recent_id);
+    name = read_station_name(file_name, most_recent_id);
 
     gtk_widget_show(stop_button);
     gtk_widget_show(pause_button);
@@ -623,26 +694,9 @@ static void pause_button_clicked_cb(GtkWidget* widget, gpointer data) {
     gtk_widget_hide(pause_button);
 }
 
-GtkWidget* make_image_from_file(char* file, int x, int y) {
-    GtkWidget* image;
-    GdkPixbuf* pixbuf;
-
-    //GError* error = NULL;
-
-    pixbuf = gdk_pixbuf_new_from_file_at_scale(file, x, y, FALSE, NULL);
-
-    //fprintf(stderr, "error with pixbuf: %s\r\n", error->message);
-
-    image = gtk_image_new_from_pixbuf(pixbuf);
-
-    g_object_unref(pixbuf);
-
-    return image;
-}
-
 void change_station_playing_image(char* thumbnail) {
     gtk_image_set_from_icon_name(GTK_IMAGE(station_image), "audio-x-generic", GTK_ICON_SIZE_BUTTON);
-    struct img_and_dims* info = malloc((sizeof(int)*2)+8);
+    img_and_dims* info = malloc((sizeof(int)*2)+8);
 
     info->image = station_image;
     info->x = 50;
@@ -655,14 +709,9 @@ void change_station_playing_image(char* thumbnail) {
 GtkWidget* make_image_from_resource(const char* address, int x, int y) {
     GtkWidget* image;
 
-
-    //GInputStream* stream = make_input_stream(address);
-
     image = gtk_image_new_from_icon_name("audio-x-generic", GTK_ICON_SIZE_BUTTON);
 
-    //gdk_pixbuf_new_from_stream_at_scale_async(stream, x, y, FALSE, NULL, image_loaded_cb, image);
-
-    struct img_and_dims* info = malloc((sizeof(int)*2)+8);
+    img_and_dims* info = malloc((sizeof(int)*2)+8);
 
     info->image = image;
     info->x = x;
@@ -679,7 +728,7 @@ static void image_loaded_cb(GObject* source_object, GAsyncResult* res, gpointer 
 
     pixbuf = gdk_pixbuf_new_from_stream_finish(res, NULL);
 
-    struct img_and_dims* info = (struct img_and_dims*) user_data;
+    img_and_dims* info = (img_and_dims*) user_data;
 
     if (!pixbuf) {
         gtk_image_set_from_icon_name(GTK_IMAGE(info->image), "audio-x-generic", GTK_ICON_SIZE_BUTTON);
@@ -695,9 +744,169 @@ static void image_loaded_cb(GObject* source_object, GAsyncResult* res, gpointer 
 static void file_read_cb(GObject* source_object, GAsyncResult* res, gpointer user_data) {
     GInputStream* stream = G_INPUT_STREAM(g_file_read_finish(G_FILE(source_object), res, NULL));
 
-    struct img_and_dims* info = (struct img_and_dims*) user_data;
+    img_and_dims* info = (img_and_dims*) user_data;
 
     gdk_pixbuf_new_from_stream_at_scale_async(stream, info->x, info->y, FALSE, NULL, image_loaded_cb, user_data);
 
     g_object_unref(stream);
+}
+
+void localDB(void) {
+    char* home = getenv("HOME");
+
+    if (home == NULL) {
+        uid_t uid = getuid();
+        struct passwd* pw = getpwuid(uid);
+        home = pw->pw_dir;
+    }
+
+    //who cares it makes more sense to use sizeof(char)
+    local_station_file = calloc(strlen(home)+30, 1);
+
+
+
+    strcat(local_station_file, home);
+    strcat(local_station_file, "/.config/rajio/local_stations");
+
+    //printf("%s\r\n", local_station_file);
+
+    if (local_exsits(local_station_file)==1) {
+        char* work_around = calloc(strlen(home)+8, 1);
+        strcat(work_around, home);
+        strcat(work_around, "/.config");
+
+
+        mkdir(work_around, 0777);
+        char* work_around2 = calloc(strlen(home)+15, 1);
+
+        strcat(work_around2, work_around);
+        strcat(work_around2, "/rajio");
+
+        mkdir(work_around2, 0777);
+
+        free(work_around2);
+        //free(work_around);
+
+        if (makeDB(local_station_file)==1) {
+            fprintf(stderr, "There was a error making: %s\r\n", local_station_file);
+        }  
+    }
+}
+
+void eos_changer(void) {
+    char* file_name = stations_file;
+    switch (most_recent_file) {
+        case SYSTEM:
+            file_name = stations_file;
+            break;
+        case LOCAL:
+            file_name = local_station_file;
+            break;
+        default:
+            fprintf(stderr, "Something went wrong\r\n");
+            break;
+    }
+
+    if (get_num_of_addresses(file_name, most_recent_id) > 1) {
+        if (most_recent_reroll == get_num_of_addresses(file_name, most_recent_id)) {
+
+            most_recent_reroll = 1;
+
+            if (most_recent_id == get_highest_id(file_name)) {
+                if (most_recent_file == SYSTEM) {
+                    most_recent_file = LOCAL;
+                }
+                else if (most_recent_file == LOCAL) {
+                    most_recent_file = SYSTEM;
+                }
+                most_recent_id = 1;
+            }
+            else {
+                most_recent_id++;
+            }
+        }
+        else {
+            most_recent_reroll++;
+        }
+
+    }
+    else {
+        if (most_recent_id == get_highest_id(file_name)) {
+            if (most_recent_file == SYSTEM) {
+                most_recent_file = LOCAL;
+            }
+            else if (most_recent_file == LOCAL) {
+                most_recent_file = SYSTEM;
+            }
+            most_recent_id = 1;
+        }
+        else {
+            most_recent_id++;
+        }
+    }
+
+    if (start_playing_with_reroll(most_recent_id, most_recent_reroll, most_recent_file) != 0) {
+        fprintf(stderr, "There was a error\r\n");
+    }
+}
+
+int start_playing_with_reroll(int station_id, int reroll, CatStationFile file) {
+    char* file_name = stations_file;
+    switch (file) {
+        case SYSTEM:
+            file_name = stations_file;
+            break;
+        case LOCAL:
+            file_name = local_station_file;
+            break;
+        default:
+            fprintf(stderr, "Something went wrong\r\n");
+            break;
+    }
+
+    char* address = address_reroll(file_name, station_id, reroll);
+
+    most_recent_reroll = reroll;
+
+    char* thumbnail;
+
+    thumbnail = read_station_thumbnail(file_name, station_id);
+
+    char* name;
+
+    name = read_station_name(file_name, station_id);
+
+    gst_element_set_state(pipeline, GST_STATE_READY);
+
+    if (is_valid_url(address) == 0 && contains_a_pls(address) == 0) {
+            char* true_address;
+            true_address = get_address_from_pls_over_net(address);
+
+            if (is_valid_url(true_address) != 0) return -1;
+
+            g_object_set(pipeline, "uri", true_address, NULL);
+
+            free(true_address);
+
+    }
+    else if (is_valid_url(address) == 0) {
+
+        g_object_set(pipeline, "uri", address, NULL);
+
+    }
+    else return -1;
+
+    gst_element_set_state(pipeline, GST_STATE_PLAYING);
+
+    gtk_widget_show(stop_button);
+    gtk_widget_show(pause_button);
+    gtk_widget_hide(play_button);
+    change_station_playing_image(thumbnail);
+    gtk_label_set_text(GTK_LABEL(station_name_label), name);
+
+    free(address);
+    free(thumbnail);
+    free(name);
+
+    return 0;
 }
