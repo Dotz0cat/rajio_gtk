@@ -35,9 +35,12 @@ This file is part of Rajio.
 
 extern int most_recent_id;
 extern CatStationFile most_recent_file;
+extern int most_recent_reroll;
 extern GstElement* pipeline;
 
-struct img_and_dims {
+typedef struct _img_and_dims img_and_dims;
+
+struct _img_and_dims {
         GtkWidget* image;
         int x;
         int y;

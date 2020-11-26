@@ -39,12 +39,12 @@ void station_adder(char* file_name, GtkWidget* flow, CatStationFile station_file
 static void error_message_popup(GtkWidget* parrent, char* error_message);
 int start_playing(int station_id, CatStationFile file);
 int stop_playing(void);
-GtkWidget* make_image_from_file(char* file, int x, int y);
 void change_station_playing_image(char* thumbnail);
 GtkWidget* make_image_from_resource(const char* address, int x, int y);
 GInputStream* make_input_stream(const char* address);
 void localDB(void);
 void eos_changer(void);
+int start_playing_with_reroll(int station_id, int reroll, CatStationFile file);
 
 //gtk callback prototypes
 static void destroy(GtkWidget *widget, gpointer data);
@@ -66,9 +66,11 @@ extern char* read_station_thumbnail(char* file_name, int id);
 extern int append_new_station(char* file_name, int id, char* name, char* thumbnail, int num_of_addresses);
 extern int append_new_address(char* file_name, int id, char* address);
 extern char* get_address(char* file_name, int id);
-extern void set_message_handlers(GstBus *bus);
+extern void set_message_handlers(GstBus* bus);
 extern int local_exsits(const char* file_name);
 extern int makeDB(const char* file_name);
+extern char* address_reroll(const char* file_name, int station_id, int reroll);
+extern int get_num_of_addresses(const char* file_name, int id);
 
 //external parser prototypes
 extern int add_stations(char* file_name, char* sql_file);
@@ -87,6 +89,7 @@ static GtkWidget* pause_button;
 //add pause button
 int most_recent_id;
 CatStationFile most_recent_file;
+int most_recent_reroll;
 GstElement* pipeline;
 char* local_station_file;
 
@@ -185,6 +188,8 @@ void add_station(GtkWidget* flowbox, char* station_name, char* image_file, int i
 
     //add the station button to the flowbox
     gtk_container_add(GTK_CONTAINER(flowbox), button);
+
+    gtk_widget_show_all(button);
 }
 
 void station_adder(char* file_name, GtkWidget* flow, CatStationFile station_file) {
@@ -363,20 +368,33 @@ static void button_clicked_cb(GtkWidget *widget, gpointer data) {
                 error_message_popup(diolouge, "There was a error adding the station");
             }
 
-            GtkWidget* scrolled;
-
-            //GtkWidget* parent = GTK_WIDGET(data);
+            GtkWidget* fixed;
 
             GList* list = gtk_container_get_children(GTK_CONTAINER(data));
 
-            if (GTK_IS_SCROLLED_WINDOW(list->data)) {
-                scrolled = GTK_WIDGET(list->data);
+            if (GTK_IS_FIXED(list->data)) {
+                fixed = GTK_WIDGET(list->data);
             }
             else {
                 while((list = g_list_next(list)) != NULL) {
-                    //g_ascii_strcasecmp(gtk_widget_get_name((GtkWidget*) list->data), "gScroll") == 0
-                    if (GTK_IS_SCROLLED_WINDOW(list->data)) {
-                        scrolled = GTK_WIDGET(list->data);
+                    if (GTK_IS_FIXED(list->data)) {
+                        fixed = GTK_WIDGET(list->data);
+                        break;
+                    }
+                }
+            }
+
+            GtkWidget* scrolled;
+
+            GList* list2 = gtk_container_get_children(GTK_CONTAINER(fixed));
+
+            if (GTK_IS_SCROLLED_WINDOW(list2->data)) {
+                scrolled = GTK_WIDGET(list2->data);
+            }
+            else {
+                while((list2 = g_list_next(list2)) != NULL) {
+                    if (GTK_IS_SCROLLED_WINDOW(list2->data)) {
+                        scrolled = GTK_WIDGET(list2->data);
                         break;
                     }
                 }
@@ -596,6 +614,8 @@ int start_playing(int station_id, CatStationFile file) {
     }
     else return -1;
 
+    most_recent_reroll = 1;
+
     gst_element_set_state(pipeline, GST_STATE_PLAYING);
 
     gtk_widget_show(stop_button);
@@ -674,26 +694,9 @@ static void pause_button_clicked_cb(GtkWidget* widget, gpointer data) {
     gtk_widget_hide(pause_button);
 }
 
-GtkWidget* make_image_from_file(char* file, int x, int y) {
-    GtkWidget* image;
-    GdkPixbuf* pixbuf;
-
-    //GError* error = NULL;
-
-    pixbuf = gdk_pixbuf_new_from_file_at_scale(file, x, y, FALSE, NULL);
-
-    //fprintf(stderr, "error with pixbuf: %s\r\n", error->message);
-
-    image = gtk_image_new_from_pixbuf(pixbuf);
-
-    g_object_unref(pixbuf);
-
-    return image;
-}
-
 void change_station_playing_image(char* thumbnail) {
     gtk_image_set_from_icon_name(GTK_IMAGE(station_image), "audio-x-generic", GTK_ICON_SIZE_BUTTON);
-    struct img_and_dims* info = malloc((sizeof(int)*2)+8);
+    img_and_dims* info = malloc((sizeof(int)*2)+8);
 
     info->image = station_image;
     info->x = 50;
@@ -706,14 +709,9 @@ void change_station_playing_image(char* thumbnail) {
 GtkWidget* make_image_from_resource(const char* address, int x, int y) {
     GtkWidget* image;
 
-
-    //GInputStream* stream = make_input_stream(address);
-
     image = gtk_image_new_from_icon_name("audio-x-generic", GTK_ICON_SIZE_BUTTON);
 
-    //gdk_pixbuf_new_from_stream_at_scale_async(stream, x, y, FALSE, NULL, image_loaded_cb, image);
-
-    struct img_and_dims* info = malloc((sizeof(int)*2)+8);
+    img_and_dims* info = malloc((sizeof(int)*2)+8);
 
     info->image = image;
     info->x = x;
@@ -730,7 +728,7 @@ static void image_loaded_cb(GObject* source_object, GAsyncResult* res, gpointer 
 
     pixbuf = gdk_pixbuf_new_from_stream_finish(res, NULL);
 
-    struct img_and_dims* info = (struct img_and_dims*) user_data;
+    img_and_dims* info = (img_and_dims*) user_data;
 
     if (!pixbuf) {
         gtk_image_set_from_icon_name(GTK_IMAGE(info->image), "audio-x-generic", GTK_ICON_SIZE_BUTTON);
@@ -746,7 +744,7 @@ static void image_loaded_cb(GObject* source_object, GAsyncResult* res, gpointer 
 static void file_read_cb(GObject* source_object, GAsyncResult* res, gpointer user_data) {
     GInputStream* stream = G_INPUT_STREAM(g_file_read_finish(G_FILE(source_object), res, NULL));
 
-    struct img_and_dims* info = (struct img_and_dims*) user_data;
+    img_and_dims* info = (img_and_dims*) user_data;
 
     gdk_pixbuf_new_from_stream_at_scale_async(stream, info->x, info->y, FALSE, NULL, image_loaded_cb, user_data);
 
@@ -809,20 +807,106 @@ void eos_changer(void) {
             break;
     }
 
-    if (most_recent_id == get_highest_id(file_name)) {
-        if (most_recent_file == SYSTEM) {
-            most_recent_file = LOCAL;
+    if (get_num_of_addresses(file_name, most_recent_id) > 1) {
+        if (most_recent_reroll == get_num_of_addresses(file_name, most_recent_id)) {
+
+            most_recent_reroll = 1;
+
+            if (most_recent_id == get_highest_id(file_name)) {
+                if (most_recent_file == SYSTEM) {
+                    most_recent_file = LOCAL;
+                }
+                else if (most_recent_file == LOCAL) {
+                    most_recent_file = SYSTEM;
+                }
+                most_recent_id = 1;
+            }
+            else {
+                most_recent_id++;
+            }
         }
-        else if (most_recent_file == LOCAL) {
-            most_recent_file = SYSTEM;
+        else {
+            most_recent_reroll++;
         }
-        most_recent_id = 1;
+
     }
     else {
-        most_recent_id++;
+        if (most_recent_id == get_highest_id(file_name)) {
+            if (most_recent_file == SYSTEM) {
+                most_recent_file = LOCAL;
+            }
+            else if (most_recent_file == LOCAL) {
+                most_recent_file = SYSTEM;
+            }
+            most_recent_id = 1;
+        }
+        else {
+            most_recent_id++;
+        }
     }
 
-    if (start_playing(most_recent_id, most_recent_file) != 0) {
+    if (start_playing_with_reroll(most_recent_id, most_recent_reroll, most_recent_file) != 0) {
         fprintf(stderr, "There was a error\r\n");
     }
+}
+
+int start_playing_with_reroll(int station_id, int reroll, CatStationFile file) {
+    char* file_name = stations_file;
+    switch (file) {
+        case SYSTEM:
+            file_name = stations_file;
+            break;
+        case LOCAL:
+            file_name = local_station_file;
+            break;
+        default:
+            fprintf(stderr, "Something went wrong\r\n");
+            break;
+    }
+
+    char* address = address_reroll(file_name, station_id, reroll);
+
+    most_recent_reroll = reroll;
+
+    char* thumbnail;
+
+    thumbnail = read_station_thumbnail(file_name, station_id);
+
+    char* name;
+
+    name = read_station_name(file_name, station_id);
+
+    gst_element_set_state(pipeline, GST_STATE_READY);
+
+    if (is_valid_url(address) == 0 && contains_a_pls(address) == 0) {
+            char* true_address;
+            true_address = get_address_from_pls_over_net(address);
+
+            if (is_valid_url(true_address) != 0) return -1;
+
+            g_object_set(pipeline, "uri", true_address, NULL);
+
+            free(true_address);
+
+    }
+    else if (is_valid_url(address) == 0) {
+
+        g_object_set(pipeline, "uri", address, NULL);
+
+    }
+    else return -1;
+
+    gst_element_set_state(pipeline, GST_STATE_PLAYING);
+
+    gtk_widget_show(stop_button);
+    gtk_widget_show(pause_button);
+    gtk_widget_hide(play_button);
+    change_station_playing_image(thumbnail);
+    gtk_label_set_text(GTK_LABEL(station_name_label), name);
+
+    free(address);
+    free(thumbnail);
+    free(name);
+
+    return 0;
 }

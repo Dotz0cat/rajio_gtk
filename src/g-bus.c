@@ -20,11 +20,11 @@ This file is part of Rajio.
 #include "rajio.h"
 
 //prototypes
-void set_message_handlers(GstBus *bus);
-void error_handler(GstBus *bus, GstMessage *msg, gpointer data);
-void warn_handler(GstBus *bus, GstMessage *msg, gpointer data);
-void eos_handler(GstBus *bus, GstMessage *msg, gpointer data);
-void have_type(GstElement *typefind, guint probability, GstCaps *caps, gpointer user_data);
+void set_message_handlers(GstBus* bus);
+void error_handler(GstBus* bus, GstMessage* msg, gpointer data);
+void warn_handler(GstBus* bus, GstMessage* msg, gpointer data);
+void eos_handler(GstBus* bus, GstMessage* msg, gpointer data);
+void have_type(GstElement* typefind, guint probability, GstCaps* caps, gpointer user_data);
 void deep_element_stuff(GstBin* self, GstBin* sub_bin, GstElement* element, gpointer data);
 void element_stuff(GstBin* self, GstElement* element, gpointer data);
 
@@ -32,7 +32,7 @@ void element_stuff(GstBin* self, GstElement* element, gpointer data);
 extern void eos_changer(void);
 extern int genaric_regex(const char* string, const char* regex_string);
 
-void set_message_handlers(GstBus *bus) {
+void set_message_handlers(GstBus* bus) {
 	gst_bus_add_signal_watch_full(bus, G_PRIORITY_DEFAULT);
 	g_signal_connect(bus, "message::error", G_CALLBACK(error_handler), NULL);
 	g_signal_connect(bus, "message::warning", G_CALLBACK(warn_handler), NULL);
@@ -42,9 +42,9 @@ void set_message_handlers(GstBus *bus) {
 
 }
 
-void error_handler(GstBus *bus, GstMessage *msg, gpointer data) {
-	GError *err;
-    gchar *debug;
+void error_handler(GstBus* bus, GstMessage* msg, gpointer data) {
+	GError* err;
+    gchar* debug;
 
     gst_message_parse_error(msg, &err, &debug);
     printf("Error: %s\n", err->message);
@@ -52,9 +52,9 @@ void error_handler(GstBus *bus, GstMessage *msg, gpointer data) {
     g_free(debug);
 }
 
-void warn_handler(GstBus *bus, GstMessage *msg, gpointer data) {
-	GError *err;
-    gchar *debug;
+void warn_handler(GstBus* bus, GstMessage* msg, gpointer data) {
+	GError* err;
+    gchar* debug;
 
     gst_message_parse_warning(msg, &err, &debug);
     printf("warn: %s\n", err->message);
@@ -62,7 +62,7 @@ void warn_handler(GstBus *bus, GstMessage *msg, gpointer data) {
     g_free(debug);
 }
 
-void eos_handler(GstBus *bus, GstMessage *msg, gpointer data) {
+void eos_handler(GstBus* bus, GstMessage* msg, gpointer data) {
 	gst_element_set_state(pipeline, GST_STATE_READY);
 
 	eos_changer();
@@ -70,7 +70,7 @@ void eos_handler(GstBus *bus, GstMessage *msg, gpointer data) {
 	return;
 }
 
-void have_type(GstElement *typefind, guint probability, GstCaps *caps, gpointer user_data) {
+void have_type(GstElement* typefind, guint probability, GstCaps* caps, gpointer user_data) {
 	//printf("have-type signal emited\r\n");
 	//add as debug
 }
