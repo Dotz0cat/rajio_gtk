@@ -51,8 +51,8 @@ static void destroy(GtkWidget *widget, gpointer data);
 static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer data);
 static void button_clicked_cb(GtkWidget *widget, gpointer data);
 static void event_box_clicked_cb(GtkWidget *widget, gpointer data);
-static void file_chooser_thumbnail_clicked_cb(GtkWidget *widget, gpointer data);
-static void file_chooser_address_clicked_cb(GtkWidget *widget, gpointer parrent);
+static void file_chooser_thumbnail_clicked_cb(GtkWidget *widget, gpointer dialog);
+static void file_chooser_address_clicked_cb(GtkWidget *widget, gpointer dialog);
 static void stop_button_clicked_cb(GtkWidget* widget, gpointer data);
 static void play_button_clicked_cb(GtkWidget* widget, gpointer data);
 static void pause_button_clicked_cb(GtkWidget* widget, gpointer data);
@@ -72,6 +72,7 @@ extern int makeDB(const char* file_name);
 extern char* address_reroll(const char* file_name, int station_id, int reroll);
 extern int get_num_of_addresses(const char* file_name, int id);
 extern UIWidgets* build_gui(void);
+extern DialogWidgets* build_dialog(GtkWidget* window);
 
 //external parser prototypes
 extern int add_stations(char* file_name, char* sql_file);
@@ -220,7 +221,7 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer data) 
 }
 
 static void button_clicked_cb(GtkWidget *widget, gpointer data) {
-    GtkWidget* diolouge;
+    /*GtkWidget* diolouge;
 
     GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
 
@@ -319,27 +320,36 @@ static void button_clicked_cb(GtkWidget *widget, gpointer data) {
 
     gtk_grid_attach(GTK_GRID(grid), address_manual_entry, 1, 9, 4, 1);
     //add grid to content area
-    gtk_container_add(GTK_CONTAINER(content_area), grid);
+    gtk_container_add(GTK_CONTAINER(content_area), grid);*/
+
+    DialogWidgets* DIALOG = build_dialog(UI->window);
+
+    char* name_value;
+    char* thumbnail_path;
+    int num_of_addresses;
+
+    g_signal_connect(DIALOG->thumbnail_chooser, "clicked", G_CALLBACK(file_chooser_thumbnail_clicked_cb), (gpointer) DIALOG);
+    g_signal_connect(DIALOG->address_file_chooser, "clicked", G_CALLBACK(file_chooser_address_clicked_cb), (gpointer) DIALOG);
 
     //show gtk stuff and enter a loop
-    gtk_widget_show_all(diolouge);
+    gtk_widget_show_all(DIALOG->dialog);
 
-    int response = gtk_dialog_run(GTK_DIALOG(diolouge));
+    int response = gtk_dialog_run(GTK_DIALOG(DIALOG->dialog));
 
     switch (response) {
         case(GTK_RESPONSE_ACCEPT):
             //get info and make call to append_new_station() and append_new_address
-            name_value = gtk_editable_get_chars(GTK_EDITABLE(name_entry), 0, -1);
+            name_value = gtk_editable_get_chars(GTK_EDITABLE(DIALOG->name_entry), 0, -1);
             if (strcmp(name_value, "") == 0) {
-                error_message_popup(diolouge, "Please enter a valid name");
+                error_message_popup(DIALOG->dialog, "Please enter a valid name");
                 break;
             }
 
             char* thumbnail_holder;
 
-            thumbnail_holder = gtk_editable_get_chars(GTK_EDITABLE(thumbnail_entry), 0, -1);
+            thumbnail_holder = gtk_editable_get_chars(GTK_EDITABLE(DIALOG->thumbnail_entry), 0, -1);
             if (strcmp(thumbnail_holder, "") == 0) {
-                error_message_popup(diolouge, "Please enter a valid thumbnail path");
+                error_message_popup(DIALOG->dialog, "Please enter a valid thumbnail path");
                 break;
             }
             
@@ -357,9 +367,9 @@ static void button_clicked_cb(GtkWidget *widget, gpointer data) {
 
             num_of_addresses = 0;
 
-            if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(radio_enter_manually))) {
+            if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(DIALOG->radio_enter_manually))) {
                 
-                char* address = gtk_editable_get_chars(GTK_EDITABLE(address_manual_entry), 0, -1);
+                char* address = gtk_editable_get_chars(GTK_EDITABLE(DIALOG->address_manual_entry), 0, -1);
 
                 if (is_valid_url(address) == 0) {
                     num_of_addresses = 1;
@@ -368,28 +378,28 @@ static void button_clicked_cb(GtkWidget *widget, gpointer data) {
                     }
                 }
                 else {
-                    error_message_popup(diolouge, "The address entered was not valid");
+                    error_message_popup(DIALOG->dialog, "The address entered was not valid");
                     break;
                 }
                 g_free(address);
             }
             else {
                 //the use file button is toggled
-                char* address = gtk_editable_get_chars(GTK_EDITABLE(address_file_entry), 0, -1);
+                char* address = gtk_editable_get_chars(GTK_EDITABLE(DIALOG->address_file_entry), 0, -1);
                 num_of_addresses = add_stations(address, local_station_file);
                 if (num_of_addresses <= 0) {
-                    error_message_popup(diolouge, "There was a error parsing the file provided\r\nor the file was not valid");
+                    error_message_popup(DIALOG->dialog, "There was a error parsing the file provided\r\nor the file was not valid");
                     break;
                 }
                 g_free(address);
             }
 
             if (num_of_addresses <= 0) {
-                error_message_popup(diolouge, "There was a issue somewhere");
+                error_message_popup(DIALOG->dialog, "There was a issue somewhere");
             }
 
             if (append_new_station(local_station_file, get_highest_id(local_station_file)+1, name_value, thumbnail_path, num_of_addresses) != 0) {
-                error_message_popup(diolouge, "There was a error adding the station");
+                error_message_popup(DIALOG->dialog, "There was a error adding the station");
             }
 
             /*GtkWidget* fixed;
@@ -437,7 +447,9 @@ static void button_clicked_cb(GtkWidget *widget, gpointer data) {
         break;
     }
     
-    gtk_widget_destroy(diolouge);
+    gtk_widget_destroy(DIALOG->dialog);
+
+    free(DIALOG);
 }
 
 static void event_box_clicked_cb(GtkWidget* widget, gpointer data) {
@@ -456,111 +468,53 @@ static void event_box_clicked_cb(GtkWidget* widget, gpointer data) {
 }
 
 //this is for the thumbnail
-static void file_chooser_thumbnail_clicked_cb(GtkWidget *widget, gpointer parrent) {
-    GtkWidget* dialog;
-    GtkWidget* entry;
-
-    //intermediate
-    GtkWidget* grid;
-    GtkWidget* box;
-    GList* list;
-
-    box = gtk_bin_get_child(GTK_BIN(parrent));
-
-    grid = NULL;
-
-    list = gtk_container_get_children(GTK_CONTAINER(box));
-
-    if (g_ascii_strcasecmp(gtk_widget_get_name((GtkWidget*) list->data), "add_station_grid") == 0) {
-        grid = (GtkWidget*) list->data;
-    }
-    else {
-        while((list = g_list_next(list)) != NULL) {
-            if (g_ascii_strcasecmp(gtk_widget_get_name((GtkWidget*) list->data), "add_station_grid") == 0) {
-                grid = (GtkWidget*) list->data;
-            }
-
-            if (grid != NULL) break;
-        }
-    }
-
-    entry = gtk_grid_get_child_at(GTK_GRID(grid), 1, 5);
+static void file_chooser_thumbnail_clicked_cb(GtkWidget *widget, gpointer dialog) {
+    DialogWidgets* DIALOG = (DialogWidgets*) dialog;
 
     GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
 
-    dialog = gtk_file_chooser_dialog_new("Open File", parrent, action, "Cancel", GTK_RESPONSE_CANCEL, "Ok", GTK_RESPONSE_ACCEPT, NULL);
+    GtkWidget* chooser;
 
-    int response = gtk_dialog_run(GTK_DIALOG(dialog));
+    chooser = gtk_file_chooser_dialog_new("Open File", DIALOG->dialog, action, "Cancel", GTK_RESPONSE_CANCEL, "Ok", GTK_RESPONSE_ACCEPT, NULL);
+
+    int response = gtk_dialog_run(GTK_DIALOG(chooser));
 
     if (response == GTK_RESPONSE_ACCEPT) {
         char* filename;
 
-        GtkFileChooser* chooser;
+        filename = gtk_file_chooser_get_uri(GTK_FILE_CHOOSER(chooser));
 
-        chooser = GTK_FILE_CHOOSER(dialog);
-
-        filename = gtk_file_chooser_get_uri(chooser);
-
-        gtk_entry_set_text(GTK_ENTRY(entry), filename);
+        gtk_entry_set_text(GTK_ENTRY(DIALOG->thumbnail_entry), filename);
 
         g_free(filename);
     }
 
-    gtk_widget_destroy(dialog);
+    gtk_widget_destroy(chooser);
 }
 
 //this is for the address
-static void file_chooser_address_clicked_cb(GtkWidget *widget, gpointer parrent) {
-    GtkWidget* dialog;
-    GtkWidget* entry;
-
-    //intermediate
-    GtkWidget* grid;
-    GtkWidget* box;
-    GList* list;
-
-    box = gtk_bin_get_child(GTK_BIN(parrent));
-
-    grid = NULL;
-
-    list = gtk_container_get_children(GTK_CONTAINER(box));
-
-    if (g_ascii_strcasecmp(gtk_widget_get_name((GtkWidget*) list->data), "add_station_grid") == 0) {
-        grid = (GtkWidget*) list->data;
-    }
-    else {
-        while((list = g_list_next(list)) != NULL) {
-            if (g_ascii_strcasecmp(gtk_widget_get_name((GtkWidget*) list->data), "add_station_grid") == 0) {
-                grid = (GtkWidget*) list->data;
-            }
-
-            if (grid != NULL) break;
-        }
-    }
-
-    entry = gtk_grid_get_child_at(GTK_GRID(grid), 1, 8);
+static void file_chooser_address_clicked_cb(GtkWidget *widget, gpointer dialog) {
+    DialogWidgets* DIALOG = (DialogWidgets*) dialog;
 
     GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
 
-    dialog = gtk_file_chooser_dialog_new("Open File", parrent, action, "Cancel", GTK_RESPONSE_CANCEL, "Ok", GTK_RESPONSE_ACCEPT, NULL);
+    GtkWidget* chooser;
 
-    int response = gtk_dialog_run(GTK_DIALOG(dialog));
+    chooser = gtk_file_chooser_dialog_new("Open File", DIALOG->dialog, action, "Cancel", GTK_RESPONSE_CANCEL, "Ok", GTK_RESPONSE_ACCEPT, NULL);
+
+    int response = gtk_dialog_run(GTK_DIALOG(chooser));
 
     if (response == GTK_RESPONSE_ACCEPT) {
         char* filename;
 
-        GtkFileChooser* chooser;
+        filename = gtk_file_chooser_get_uri(GTK_FILE_CHOOSER(chooser));
 
-        chooser = GTK_FILE_CHOOSER(dialog);
-
-        filename = gtk_file_chooser_get_filename(chooser);
-
-        gtk_entry_set_text(GTK_ENTRY(entry), filename);
+        gtk_entry_set_text(GTK_ENTRY(DIALOG->address_file_entry), filename);
 
         g_free(filename);
     }
 
-    gtk_widget_destroy(dialog);
+    gtk_widget_destroy(chooser);
 }
 
 static void error_message_popup(GtkWidget* parrent, char* error_message) {

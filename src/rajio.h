@@ -59,9 +59,16 @@ struct _UIWidgets {
 	GtkWidget* stop;
 };
 
-/*typedef struct _DialogWidgets DialogWidgets;
+typedef struct _DialogWidgets DialogWidgets;
 
 struct _DialogWidgets {
-	GtkWidget* 
+	GtkWidget* dialog;
+	GtkWidget* name_entry;
+	GtkWidget* thumbnail_entry;
+	GtkWidget* thumbnail_chooser;
+	GtkWidget* radio_use_file;
+    GtkWidget* radio_enter_manually;
+    GtkWidget* address_file_entry;
+    GtkWidget* address_file_chooser;
+    GtkWidget* address_manual_entry;
 };
-*/
