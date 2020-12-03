@@ -7,8 +7,8 @@ SRCDIR= src
 OBJDIR= obj
 PREFIX?= /usr/local
 
-build: $(OBJDIR) $(SRCDIR)/rajio.h $(OBJDIR)/main.o $(OBJDIR)/parser.o $(OBJDIR)/station_reader.o $(OBJDIR)/g-bus.o $(SRCDIR)/gtk/station_button.h $(OBJDIR)/gtk/station_button.o
-	@$(CC) $(CFLAGS) $(CPPFLAGS) $(OBJDIR)/main.o $(OBJDIR)/parser.o $(OBJDIR)/station_reader.o $(OBJDIR)/g-bus.o $(OBJDIR)/gtk/station_button.o -o rajio $(LDLIBS) $(LDFLAGS)
+build: $(OBJDIR) $(SRCDIR)/rajio.h $(OBJDIR)/main.o $(OBJDIR)/parser.o $(OBJDIR)/station_reader.o $(OBJDIR)/g-bus.o $(SRCDIR)/gtk/station_button.h $(OBJDIR)/gtk/station_button.o $(OBJDIR)/gui.o
+	@$(CC) $(CFLAGS) $(CPPFLAGS) $(OBJDIR)/main.o $(OBJDIR)/parser.o $(OBJDIR)/station_reader.o $(OBJDIR)/g-bus.o $(OBJDIR)/gtk/station_button.o $(OBJDIR)/gui.o -o rajio $(LDLIBS) $(LDFLAGS)
 
 $(OBJDIR):
 	@mkdir $(OBJDIR)
@@ -29,6 +29,9 @@ $(OBJDIR)/g-bus.o: $(SRCDIR)/g-bus.c
 $(OBJDIR)/gtk/station_button.o: $(SRCDIR)/gtk/station_button.c
 	@$(CC) $(CFLAGS) $(CPPFLAGS) -c $(SRCDIR)/gtk/station_button.c -o $(OBJDIR)/gtk/station_button.o
 
+$(OBJDIR)/gui.o: $(SRCDIR)/gui.c
+	@$(CC) $(CFLAGS) $(CPPFLAGS) -c $(SRCDIR)/gui.c -o $(OBJDIR)/gui.o
+
 install: build
 	install -D rajio -t ${DESTDIR}${PREFIX}/bin
 	install -D stations -t ${DESTDIR}${PREFIX}/share/rajio
@@ -41,6 +44,7 @@ clean:
 	-rm $(OBJDIR)/parser.o 
 	-rm $(OBJDIR)/station_reader.o 
 	-rm $(OBJDIR)/g-bus.o 
+	-rm $(OBJDIR)/gui.o
 	-rm $(OBJDIR)/gtk/station_button.o
 	-rmdir $(OBJDIR)/gtk
 	-rmdir $(OBJDIR)
