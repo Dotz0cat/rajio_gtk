@@ -71,6 +71,7 @@ extern int local_exsits(const char* file_name);
 extern int makeDB(const char* file_name);
 extern char* address_reroll(const char* file_name, int station_id, int reroll);
 extern int get_num_of_addresses(const char* file_name, int id);
+extern UIWidgets* build_gui(void);
 
 //external parser prototypes
 extern int add_stations(char* file_name, char* sql_file);
@@ -81,12 +82,13 @@ extern int genaric_regex(const char* string, const char* regex_string);
 
 //global variables
 //static int station_number;
-static GtkWidget* station_image;
+/*static GtkWidget* station_image;
 static GtkWidget* station_name_label;
 static GtkWidget* play_button;
 static GtkWidget* stop_button;
-static GtkWidget* pause_button;
+static GtkWidget* pause_button;*/
 //add pause button
+UIWidgets* UI;
 int most_recent_id;
 CatStationFile most_recent_file;
 int most_recent_reroll;
@@ -95,9 +97,9 @@ char* local_station_file;
 
 int main(int argc, char* argv[]) {
 
-    GtkBuilder* builder;
+    /*GtkBuilder* builder;
     GtkWidget* window;
-    GtkWidget* flow;
+    GtkWidget* flow;*/
 
     GstBus* bus;
 
@@ -113,7 +115,7 @@ int main(int argc, char* argv[]) {
 
     set_message_handlers(bus);
 
-    builder = gtk_builder_new();
+    /*builder = gtk_builder_new();
     gtk_builder_add_from_file(builder, gtk_builder_file, NULL);
     window = GTK_WIDGET(gtk_builder_get_object(builder, "gWindow"));
     flow = GTK_WIDGET(gtk_builder_get_object(builder, "flowbox1"));
@@ -121,34 +123,36 @@ int main(int argc, char* argv[]) {
     station_name_label = GTK_WIDGET(gtk_builder_get_object(builder, "gStationNamePlaying"));
     play_button = GTK_WIDGET(gtk_builder_get_object(builder, "gPlay"));
     stop_button = GTK_WIDGET(gtk_builder_get_object(builder, "gStop"));
-    pause_button = GTK_WIDGET(gtk_builder_get_object(builder, "gPause"));
+    pause_button = GTK_WIDGET(gtk_builder_get_object(builder, "gPause"));*/
+
+    UI = build_gui();
+
+    gtk_window_set_default_size(GTK_WINDOW(UI->window), 1000, 400);
 
     //check and make local db
     localDB();
 
     //add the staion images and names to the flowbox
-    station_adder(stations_file, flow, SYSTEM);
-    station_adder(local_station_file, flow, LOCAL);
+    station_adder(stations_file, UI->flow, SYSTEM);
+    station_adder(local_station_file, UI->flow, LOCAL);
 
     //add a dioluge popup to the add station button
-    GtkWidget* station_add;
-    station_add = GTK_WIDGET(gtk_builder_get_object(builder, "gStationAdd"));
 
-    g_signal_connect(station_add, "clicked", G_CALLBACK(button_clicked_cb), (gpointer) window);
-    g_signal_connect(play_button, "clicked", G_CALLBACK(play_button_clicked_cb), (gpointer) window);
-    g_signal_connect(stop_button, "clicked", G_CALLBACK(stop_button_clicked_cb), (gpointer) window);
-    g_signal_connect(pause_button, "clicked", G_CALLBACK(pause_button_clicked_cb), (gpointer) window);
+    g_signal_connect(UI->station_add, "clicked", G_CALLBACK(button_clicked_cb), NULL);
+    g_signal_connect(UI->play, "clicked", G_CALLBACK(play_button_clicked_cb), NULL);
+    g_signal_connect(UI->stop, "clicked", G_CALLBACK(stop_button_clicked_cb), NULL);
+    g_signal_connect(UI->pause, "clicked", G_CALLBACK(pause_button_clicked_cb), NULL);
 
     //gtk_button_set_relief(GTK_BUTTON(station_add), GTK_RELIEF_NONE);
 
     //makes the window close
-    g_signal_connect(window, "delete-event", G_CALLBACK (delete_event), NULL);
-    g_signal_connect(window, "destroy", G_CALLBACK (destroy), NULL);
+    g_signal_connect(UI->window, "delete-event", G_CALLBACK (delete_event), NULL);
+    g_signal_connect(UI->window, "destroy", G_CALLBACK (destroy), NULL);
 
-    gtk_widget_show_all(window);
-    gtk_widget_hide(play_button);
-    gtk_widget_hide(stop_button);
-    gtk_widget_hide(pause_button);
+    gtk_widget_show_all(UI->window);
+    gtk_widget_hide(UI->play);
+    gtk_widget_hide(UI->stop);
+    gtk_widget_hide(UI->pause);
     gtk_main();
 
     return 0;
@@ -220,7 +224,7 @@ static void button_clicked_cb(GtkWidget *widget, gpointer data) {
 
     GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
 
-    diolouge = gtk_dialog_new_with_buttons("Add Station", data, flags, "Ok", GTK_RESPONSE_ACCEPT, "Cancel", GTK_RESPONSE_REJECT, NULL);
+    diolouge = gtk_dialog_new_with_buttons("Add Station", UI->window, flags, "Ok", GTK_RESPONSE_ACCEPT, "Cancel", GTK_RESPONSE_REJECT, NULL);
 
     //make a grid and stuff and add stuff to it
     GtkWidget* content_area;
@@ -388,7 +392,7 @@ static void button_clicked_cb(GtkWidget *widget, gpointer data) {
                 error_message_popup(diolouge, "There was a error adding the station");
             }
 
-            GtkWidget* fixed;
+            /*GtkWidget* fixed;
 
             GList* list = gtk_container_get_children(GTK_CONTAINER(data));
 
@@ -420,10 +424,10 @@ static void button_clicked_cb(GtkWidget *widget, gpointer data) {
                 }
             }
 
-            GtkWidget* view = gtk_bin_get_child(GTK_BIN(scrolled));
+            GtkWidget* view = gtk_bin_get_child(GTK_BIN(scrolled));*/
 
 
-            add_station(gtk_bin_get_child(GTK_BIN(view)), name_value, thumbnail_path, get_highest_id(local_station_file), LOCAL);
+            add_station(UI->flow, name_value, thumbnail_path, get_highest_id(local_station_file), LOCAL);
 
             g_free(name_value);
             free(thumbnail_path);
@@ -443,16 +447,8 @@ static void event_box_clicked_cb(GtkWidget* widget, gpointer data) {
     most_recent_id = id;
     most_recent_file = file;
 
-    //get the gtk window
-    GtkWidget* flow_child = gtk_widget_get_parent(widget);
-    GtkWidget* flow = gtk_widget_get_parent(flow_child);
-    GtkWidget* view = gtk_widget_get_parent(flow);
-    GtkWidget* scroll = gtk_widget_get_parent(view);
-    GtkWidget* fixed = gtk_widget_get_parent(scroll);
-    GtkWidget* window = gtk_widget_get_parent(fixed);
-
     if (start_playing(id, file) != 0) {
-        error_message_popup(window, "There was a error somewhere");
+        error_message_popup(UI->window, "There was a error somewhere");
         return;
     }
 
@@ -641,11 +637,11 @@ int start_playing(int station_id, CatStationFile file) {
 
     gst_element_set_state(pipeline, GST_STATE_PLAYING);
 
-    gtk_widget_show(stop_button);
-    gtk_widget_show(pause_button);
-    gtk_widget_hide(play_button);
+    gtk_widget_show(UI->stop);
+    gtk_widget_show(UI->pause);
+    gtk_widget_hide(UI->play);
     change_station_playing_image(thumbnail);
-    gtk_label_set_text(GTK_LABEL(station_name_label), name);
+    gtk_label_set_text(GTK_LABEL(UI->station_label), name);
 
     free(address);
     free(thumbnail);
@@ -658,11 +654,11 @@ int stop_playing() {
 
     gst_element_set_state(pipeline, GST_STATE_READY);
 
-    gtk_widget_show(play_button);
-    gtk_widget_hide(stop_button);
-    gtk_widget_hide(pause_button);
-    gtk_image_set_from_icon_name(GTK_IMAGE(station_image), "audio-x-generic", GTK_ICON_SIZE_BUTTON);
-    gtk_label_set_text(GTK_LABEL(station_name_label), "No Station Playing");
+    gtk_widget_show(UI->play);
+    gtk_widget_hide(UI->stop);
+    gtk_widget_hide(UI->pause);
+    gtk_image_set_from_icon_name(GTK_IMAGE(UI->station_image), "audio-x-generic", GTK_ICON_SIZE_BUTTON);
+    gtk_label_set_text(GTK_LABEL(UI->station_label), "No Station Playing");
 
     return 0;
 }
@@ -697,11 +693,11 @@ static void play_button_clicked_cb(GtkWidget* widget, gpointer data) {
 
     name = read_station_name(file_name, most_recent_id);
 
-    gtk_widget_show(stop_button);
-    gtk_widget_show(pause_button);
-    gtk_widget_hide(play_button);
+    gtk_widget_show(UI->stop);
+    gtk_widget_show(UI->pause);
+    gtk_widget_hide(UI->play);
     change_station_playing_image(thumbnail);
-    gtk_label_set_text(GTK_LABEL(station_name_label), name);
+    gtk_label_set_text(GTK_LABEL(UI->station_label), name);
 
     free(thumbnail);
     free(name);
@@ -710,18 +706,18 @@ static void play_button_clicked_cb(GtkWidget* widget, gpointer data) {
 static void pause_button_clicked_cb(GtkWidget* widget, gpointer data) {
     gst_element_set_state(pipeline, GST_STATE_PAUSED);
 
-    gtk_label_set_text(GTK_LABEL(station_name_label), "Paused");
+    gtk_label_set_text(GTK_LABEL(UI->station_label), "Paused");
 
-    gtk_widget_show(play_button);
-    gtk_widget_show(stop_button);
-    gtk_widget_hide(pause_button);
+    gtk_widget_show(UI->play);
+    gtk_widget_show(UI->stop);
+    gtk_widget_hide(UI->pause);
 }
 
 void change_station_playing_image(char* thumbnail) {
-    gtk_image_set_from_icon_name(GTK_IMAGE(station_image), "audio-x-generic", GTK_ICON_SIZE_BUTTON);
+    gtk_image_set_from_icon_name(GTK_IMAGE(UI->station_image), "audio-x-generic", GTK_ICON_SIZE_BUTTON);
     img_and_dims* info = malloc((sizeof(int)*2)+8);
 
-    info->image = station_image;
+    info->image = UI->station_image;
     info->x = 50;
     info->y = 50;
 
@@ -921,11 +917,11 @@ int start_playing_with_reroll(int station_id, int reroll, CatStationFile file) {
 
     gst_element_set_state(pipeline, GST_STATE_PLAYING);
 
-    gtk_widget_show(stop_button);
-    gtk_widget_show(pause_button);
-    gtk_widget_hide(play_button);
+    gtk_widget_show(UI->stop);
+    gtk_widget_show(UI->pause);
+    gtk_widget_hide(UI->play);
     change_station_playing_image(thumbnail);
-    gtk_label_set_text(GTK_LABEL(station_name_label), name);
+    gtk_label_set_text(GTK_LABEL(UI->station_label), name);
 
     free(address);
     free(thumbnail);

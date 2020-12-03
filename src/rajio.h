@@ -45,3 +45,23 @@ struct _img_and_dims {
         int x;
         int y;
     };
+
+typedef struct _UIWidgets UIWidgets;
+
+struct _UIWidgets {
+	GtkWidget* window;
+	GtkWidget* flow;
+	GtkWidget* station_image;
+	GtkWidget* station_label;
+	GtkWidget* station_add;
+	GtkWidget* pause;
+	GtkWidget* play;
+	GtkWidget* stop;
+};
+
+/*typedef struct _DialogWidgets DialogWidgets;
+
+struct _DialogWidgets {
+	GtkWidget* 
+};
+*/
