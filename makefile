@@ -15,7 +15,7 @@ $(OBJDIR):
 	@mkdir $(OBJDIR)/gtk
 
 $(OBJDIR)/main.o: $(SRCDIR)/main.c
-	@$(CC) $(CFLAGS) $(CPPFLAGS) -Dgtk_builder_file="\"${PREFIX}/share/rajio/rajio_gtk_v2.glade\"" -Dstations_file="\"${PREFIX}/share/rajio/stations\"" -c $(SRCDIR)/main.c -o $(OBJDIR)/main.o
+	@$(CC) $(CFLAGS) $(CPPFLAGS) -Dstations_file="\"${PREFIX}/share/rajio/stations\"" -c $(SRCDIR)/main.c -o $(OBJDIR)/main.o
 
 $(OBJDIR)/parser.o: $(SRCDIR)/parser.c
 	@$(CC) $(CFLAGS) $(CPPFLAGS) -c $(SRCDIR)/parser.c -o $(OBJDIR)/parser.o
@@ -35,7 +35,6 @@ $(OBJDIR)/gui.o: $(SRCDIR)/gui.c
 install: build
 	install -D rajio -t ${DESTDIR}${PREFIX}/bin
 	install -D stations -t ${DESTDIR}${PREFIX}/share/rajio
-	install -D rajio_gtk_v2.glade -t ${DESTDIR}${PREFIX}/share/rajio
 
 .PHONY: clean
 clean:
@@ -54,5 +53,4 @@ clean:
 uninstall: 
 	rm -f ${DESTDIR}${PREFIX}/bin/rajio
 	rm -f ${DESTDIR}${PREFIX}/share/rajio/stations
-	rm -f ${DESTDIR}${PREFIX}/share/rajio/rajio_gtk_v2.glade
 	rmdir ${DESTDIR}${PREFIX}/share/rajio
