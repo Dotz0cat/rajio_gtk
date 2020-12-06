@@ -29,10 +29,6 @@ This file is part of Rajio.
     #define stations_file "/usr/local/share/rajio/stations"
 #endif
 
-#ifndef gtk_builder_file
-    #define gtk_builder_file "/usr/local/share/rajio/rajio_gtk_v2.glade"
-#endif
-
 //prototypes
 void add_station(GtkWidget* flowbox, char* station_name, char* image_file, int id, CatStationFile station_file);
 void station_adder(char* file_name, GtkWidget* flow, CatStationFile station_file);
@@ -47,12 +43,12 @@ void eos_changer(void);
 int start_playing_with_reroll(int station_id, int reroll, CatStationFile file);
 
 //gtk callback prototypes
-static void destroy(GtkWidget *widget, gpointer data);
-static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer data);
-static void button_clicked_cb(GtkWidget *widget, gpointer data);
-static void event_box_clicked_cb(GtkWidget *widget, gpointer data);
-static void file_chooser_thumbnail_clicked_cb(GtkWidget *widget, gpointer dialog);
-static void file_chooser_address_clicked_cb(GtkWidget *widget, gpointer dialog);
+static void destroy(GtkWidget* widget, gpointer data);
+static gboolean delete_event(GtkWidget* widget, GdkEvent *event, gpointer data);
+static void button_clicked_cb(GtkWidget* widget, gpointer data);
+static void event_box_clicked_cb(GtkWidget* widget, gpointer data);
+static void file_chooser_thumbnail_clicked_cb(GtkWidget* widget, gpointer dialog);
+static void file_chooser_address_clicked_cb(GtkWidget* widget, gpointer dialog);
 static void stop_button_clicked_cb(GtkWidget* widget, gpointer data);
 static void play_button_clicked_cb(GtkWidget* widget, gpointer data);
 static void pause_button_clicked_cb(GtkWidget* widget, gpointer data);
@@ -98,10 +94,6 @@ char* local_station_file;
 
 int main(int argc, char* argv[]) {
 
-    /*GtkBuilder* builder;
-    GtkWidget* window;
-    GtkWidget* flow;*/
-
     GstBus* bus;
 
     gtk_init(&argc, &argv);
@@ -115,16 +107,6 @@ int main(int argc, char* argv[]) {
     bus = gst_element_get_bus(pipeline);
 
     set_message_handlers(bus);
-
-    /*builder = gtk_builder_new();
-    gtk_builder_add_from_file(builder, gtk_builder_file, NULL);
-    window = GTK_WIDGET(gtk_builder_get_object(builder, "gWindow"));
-    flow = GTK_WIDGET(gtk_builder_get_object(builder, "flowbox1"));
-    station_image = GTK_WIDGET(gtk_builder_get_object(builder, "gStaationPlaying"));
-    station_name_label = GTK_WIDGET(gtk_builder_get_object(builder, "gStationNamePlaying"));
-    play_button = GTK_WIDGET(gtk_builder_get_object(builder, "gPlay"));
-    stop_button = GTK_WIDGET(gtk_builder_get_object(builder, "gStop"));
-    pause_button = GTK_WIDGET(gtk_builder_get_object(builder, "gPause"));*/
 
     UI = build_gui();
 
@@ -167,7 +149,7 @@ void add_station(GtkWidget* flowbox, char* station_name, char* image_file, int i
     gtk_grid_set_row_homogeneous(GTK_GRID(grid), TRUE);
     gtk_grid_set_column_homogeneous(GTK_GRID(grid), TRUE);
 
-    //make the gtkImage
+    //make the GtkImage
     GtkWidget* image;
 
     image = make_image_from_resource(image_file, 100, 100);
@@ -212,115 +194,15 @@ void station_adder(char* file_name, GtkWidget* flow, CatStationFile station_file
     }
 }
 
-static void destroy(GtkWidget *widget, gpointer data) {
+static void destroy(GtkWidget* widget, gpointer data) {
     gtk_main_quit();
 }
 
-static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer data) {
+static gboolean delete_event(GtkWidget* widget, GdkEvent *event, gpointer data) {
     return FALSE; 
 }
 
-static void button_clicked_cb(GtkWidget *widget, gpointer data) {
-    /*GtkWidget* diolouge;
-
-    GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
-
-    diolouge = gtk_dialog_new_with_buttons("Add Station", UI->window, flags, "Ok", GTK_RESPONSE_ACCEPT, "Cancel", GTK_RESPONSE_REJECT, NULL);
-
-    //make a grid and stuff and add stuff to it
-    GtkWidget* content_area;
-
-    content_area = gtk_dialog_get_content_area(GTK_DIALOG(diolouge));
-
-    //grid
-    GtkWidget* grid;
-
-    grid = gtk_grid_new();
-
-    gtk_widget_set_name(grid, "add_station_grid");
-
-    //delectations
-    GtkWidget* name;
-    GtkWidget* name_entry;
-    GtkWidget* thumbnail;
-    GtkWidget* thumbnail_entry;
-    GtkWidget* thumbnail_chooser;
-    GtkWidget* address_label;
-    GtkWidget* radio_use_file;
-    GtkWidget* radio_enter_manually;
-    GtkWidget* address_file_entry;
-    GtkWidget* address_file_chooser;
-    GtkWidget* address_manual_entry;
-
-    //useful for later
-    char* name_value;
-    char* thumbnail_path;
-    int num_of_addresses;
-
-    //make for name and add to grid
-    name = gtk_label_new("Name");
-
-    gtk_grid_attach(GTK_GRID(grid), name, 2, 0, 1, 1);
-
-    //make name entry box
-    name_entry = gtk_entry_new();
-
-    gtk_grid_attach(GTK_GRID(grid), name_entry, 1, 1, 4, 1);
-
-    //make thumbnail label
-    thumbnail = gtk_label_new("Thumnail");
-
-    gtk_grid_attach(GTK_GRID(grid), thumbnail, 2, 4, 1, 1);
-
-    //make thumbnail entry
-    thumbnail_entry = gtk_entry_new();
-
-    gtk_grid_attach(GTK_GRID(grid), thumbnail_entry, 1, 5, 3, 1);
-
-    //add file chooser button for the thumbnail entry
-    //make a file chooser dialog popup
-
-    thumbnail_chooser = gtk_button_new();
-    // dont know how to make it look right
-
-    //add singal
-    g_signal_connect(thumbnail_chooser, "clicked", G_CALLBACK(file_chooser_thumbnail_clicked_cb), (gpointer) diolouge);
-
-    gtk_grid_attach(GTK_GRID(grid), thumbnail_chooser, 4, 5, 1, 1);
-
-    //add a label
-    address_label = gtk_label_new("Address");
-
-    gtk_grid_attach(GTK_GRID(grid), address_label, 2, 7, 1, 1);
-
-    //add first radio button
-    radio_use_file = gtk_radio_button_new(NULL);
-
-    //make address file entry
-    address_file_entry = gtk_entry_new();
-
-    gtk_grid_attach(GTK_GRID(grid), radio_use_file, 0, 8, 1, 1);
-
-    gtk_grid_attach(GTK_GRID(grid), address_file_entry, 1, 8, 3, 1);
-
-    //add the button for file selection
-    address_file_chooser = gtk_button_new();
-
-    g_signal_connect(address_file_chooser, "clicked", G_CALLBACK(file_chooser_address_clicked_cb), (gpointer) diolouge);
-
-    gtk_grid_attach(GTK_GRID(grid), address_file_chooser, 4, 8, 1, 1);
-
-    //add other radio button
-    radio_enter_manually = gtk_radio_button_new_from_widget(GTK_RADIO_BUTTON(radio_use_file));
-
-    //entry box
-    address_manual_entry = gtk_entry_new();
-
-    gtk_grid_attach(GTK_GRID(grid), radio_enter_manually, 0, 9, 1, 1);
-
-    gtk_grid_attach(GTK_GRID(grid), address_manual_entry, 1, 9, 4, 1);
-    //add grid to content area
-    gtk_container_add(GTK_CONTAINER(content_area), grid);*/
+static void button_clicked_cb(GtkWidget* widget, gpointer data) {
 
     DialogWidgets* DIALOG = build_dialog(UI->window);
 
@@ -368,7 +250,7 @@ static void button_clicked_cb(GtkWidget *widget, gpointer data) {
             num_of_addresses = 0;
 
             if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(DIALOG->radio_enter_manually))) {
-                
+                //use manual button is toggled
                 char* address = gtk_editable_get_chars(GTK_EDITABLE(DIALOG->address_manual_entry), 0, -1);
 
                 if (is_valid_url(address) == 0) {
@@ -402,41 +284,6 @@ static void button_clicked_cb(GtkWidget *widget, gpointer data) {
                 error_message_popup(DIALOG->dialog, "There was a error adding the station");
             }
 
-            /*GtkWidget* fixed;
-
-            GList* list = gtk_container_get_children(GTK_CONTAINER(data));
-
-            if (GTK_IS_FIXED(list->data)) {
-                fixed = GTK_WIDGET(list->data);
-            }
-            else {
-                while((list = g_list_next(list)) != NULL) {
-                    if (GTK_IS_FIXED(list->data)) {
-                        fixed = GTK_WIDGET(list->data);
-                        break;
-                    }
-                }
-            }
-
-            GtkWidget* scrolled;
-
-            GList* list2 = gtk_container_get_children(GTK_CONTAINER(fixed));
-
-            if (GTK_IS_SCROLLED_WINDOW(list2->data)) {
-                scrolled = GTK_WIDGET(list2->data);
-            }
-            else {
-                while((list2 = g_list_next(list2)) != NULL) {
-                    if (GTK_IS_SCROLLED_WINDOW(list2->data)) {
-                        scrolled = GTK_WIDGET(list2->data);
-                        break;
-                    }
-                }
-            }
-
-            GtkWidget* view = gtk_bin_get_child(GTK_BIN(scrolled));*/
-
-
             add_station(UI->flow, name_value, thumbnail_path, get_highest_id(local_station_file), LOCAL);
 
             g_free(name_value);
@@ -468,7 +315,7 @@ static void event_box_clicked_cb(GtkWidget* widget, gpointer data) {
 }
 
 //this is for the thumbnail
-static void file_chooser_thumbnail_clicked_cb(GtkWidget *widget, gpointer dialog) {
+static void file_chooser_thumbnail_clicked_cb(GtkWidget* widget, gpointer dialog) {
     DialogWidgets* DIALOG = (DialogWidgets*) dialog;
 
     GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
@@ -493,7 +340,7 @@ static void file_chooser_thumbnail_clicked_cb(GtkWidget *widget, gpointer dialog
 }
 
 //this is for the address
-static void file_chooser_address_clicked_cb(GtkWidget *widget, gpointer dialog) {
+static void file_chooser_address_clicked_cb(GtkWidget* widget, gpointer dialog) {
     DialogWidgets* DIALOG = (DialogWidgets*) dialog;
 
     GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
@@ -535,12 +382,8 @@ static void error_message_popup(GtkWidget* parrent, char* error_message) {
     gtk_widget_show_all(dialog);
 
     (void) gtk_dialog_run(GTK_DIALOG(dialog));
-    //when this is done just quit and destroy the dialog and the parent
 
     gtk_widget_destroy(dialog);
-
-    //gtk_widget_destroy(parrent);
-
 }
 
 int start_playing(int station_id, CatStationFile file) {
@@ -733,15 +576,10 @@ void localDB(void) {
         home = pw->pw_dir;
     }
 
-    //who cares it makes more sense to use sizeof(char)
     local_station_file = calloc(strlen(home)+30, 1);
-
-
 
     strcat(local_station_file, home);
     strcat(local_station_file, "/.config/rajio/local_stations");
-
-    //printf("%s\r\n", local_station_file);
 
     if (local_exsits(local_station_file)==1) {
         char* work_around = calloc(strlen(home)+8, 1);
@@ -758,7 +596,6 @@ void localDB(void) {
         mkdir(work_around2, 0777);
 
         free(work_around2);
-        //free(work_around);
 
         if (makeDB(local_station_file)==1) {
             fprintf(stderr, "There was a error making: %s\r\n", local_station_file);

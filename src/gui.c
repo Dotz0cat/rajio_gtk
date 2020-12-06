@@ -36,7 +36,6 @@ UIWidgets* build_gui(void) {
 	gtk_widget_set_valign(scrolled, GTK_ALIGN_FILL);
 
 	gtk_box_pack_start(GTK_BOX(main_box), scrolled, TRUE, TRUE, 0);
-	//gtk_box_set_center_widget(GTK_BOX(main_box), scrolled);
 
 	UI->flow = gtk_flow_box_new();
 
