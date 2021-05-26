@@ -1,5 +1,5 @@
 /*
-Copyright 2020 Dotz0cat
+Copyright 2020-2021 Dotz0cat
 
 This file is part of Rajio.
 
@@ -19,13 +19,13 @@ This file is part of Rajio.
 
 #include "rajio.h"
 
-UIWidgets* build_gui(void);
+//UIWidgets* build_gui(GtkApplication* app);
 DialogWidgets* build_dialog(GtkWidget* window);
 
-UIWidgets* build_gui(void) {
-	UIWidgets* UI = malloc(sizeof(UIWidgets));
+/*UIWidgets* build_gui(GtkApplication* app, UIWidgets* UI) {
+	//UIWidgets* UI = malloc(sizeof(UIWidgets));
 
-	UI->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	UI->window = gtk_application_window_new(app);
 
 	GtkWidget* main_box;
 	main_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
@@ -76,7 +76,7 @@ UIWidgets* build_gui(void) {
 	gtk_widget_set_valign(UI->station_add, GTK_ALIGN_CENTER);
 
 	return UI;
-}
+}*/
 
 DialogWidgets* build_dialog(GtkWidget* window) {
 	DialogWidgets* UI = malloc(sizeof(DialogWidgets));

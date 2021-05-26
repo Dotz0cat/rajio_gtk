@@ -32,6 +32,7 @@ This file is part of Rajio.
 #include <sys/stat.h>
 
 #include "gtk/station_button.h"
+#include "gtk/cat_application.h"
 
 extern int most_recent_id;
 extern CatStationFile most_recent_file;
@@ -45,19 +46,6 @@ struct _img_and_dims {
         int x;
         int y;
     };
-
-typedef struct _UIWidgets UIWidgets;
-
-struct _UIWidgets {
-	GtkWidget* window;
-	GtkWidget* flow;
-	GtkWidget* station_image;
-	GtkWidget* station_label;
-	GtkWidget* station_add;
-	GtkWidget* pause;
-	GtkWidget* play;
-	GtkWidget* stop;
-};
 
 typedef struct _DialogWidgets DialogWidgets;
 

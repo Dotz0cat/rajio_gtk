@@ -1,5 +1,5 @@
 /*
-Copyright 2020 Dotz0cat
+Copyright 2020-2021 Dotz0cat
 
 This file is part of Rajio.
 
@@ -21,6 +21,7 @@ This file is part of Rajio.
 #define __CAT_STATION_BUTTON_H__
 
 #include <gdk/gdk.h>
+//clang is loud
 #pragma clang diagnostic ignored "-Weverything"
 #include <gtk/gtk.h>
 #pragma clang diagnostic pop
@@ -51,15 +52,10 @@ struct _CatStationButton {
 	GtkButton button;
 
 	CatStationButtonPrivate* priv;
-	//guint station_id;
-	//enum here
-	//enum
 };
 
 struct _CatStationButtonClass {
 	GtkButtonClass parent_class;
-
-  	//void (* clicked)  (GtkButton* button);
 };
 
 GtkWidget* cat_station_button_new(void);

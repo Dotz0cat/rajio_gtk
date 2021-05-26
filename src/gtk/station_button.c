@@ -1,5 +1,5 @@
 /*
-Copyright 2020 Dotz0cat
+Copyright 2020-2021 Dotz0cat
 
 This file is part of Rajio.
 
@@ -51,8 +51,6 @@ static void cat_station_button_class_init(CatStationButtonClass* class) {
     gobject_class = G_OBJECT_CLASS(class);
     widget_class = (GtkWidgetClass* ) class;
     button_class = (GtkButtonClass* ) class;
-
-
 }
 
 static void cat_station_button_init(CatStationButton* button) {
@@ -61,8 +59,6 @@ static void cat_station_button_init(CatStationButton* button) {
     button->priv = cat_station_button_get_instance_private(button);
     button->priv->station_id = 0;
     button->priv->station_file = LOCAL;
-
-    //button->station_id = 0;
 }
 
 GtkWidget* cat_station_button_new(void) {

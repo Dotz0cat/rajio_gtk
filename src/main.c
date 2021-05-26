@@ -1,5 +1,5 @@
 /*
-Copyright 2020 Dotz0cat
+Copyright 2020-2021 Dotz0cat
 
 This file is part of Rajio.
 
@@ -67,7 +67,7 @@ extern int local_exsits(const char* file_name);
 extern int makeDB(const char* file_name);
 extern char* address_reroll(const char* file_name, int station_id, int reroll);
 extern int get_num_of_addresses(const char* file_name, int id);
-extern UIWidgets* build_gui(void);
+//extern UIWidgets* build_gui(GtkApplication* app);
 extern DialogWidgets* build_dialog(GtkWidget* window);
 
 //external parser prototypes
@@ -100,6 +100,10 @@ int main(int argc, char* argv[]) {
 
     gst_init(&argc, &argv);
 
+    GtkApplication* app;
+
+    app = cat_application_new();
+
     pipeline = gst_element_factory_make("playbin", NULL);
 
     gst_element_set_state(pipeline, GST_STATE_READY);
@@ -108,7 +112,9 @@ int main(int argc, char* argv[]) {
 
     set_message_handlers(bus);
 
-    UI = build_gui();
+    UI = cat_application_get_gui(CAT_APPLICATION(app));
+
+    //gtk_application_add_window(app, GTK_WINDOW(UI->window));
 
     gtk_window_set_default_size(GTK_WINDOW(UI->window), 1000, 400);
 
