@@ -18,15 +18,7 @@ This file is part of Rajio.
 */
 
 #include "rajio.h"
-
-//prototypes
-void set_message_handlers(GstBus* bus);
-void error_handler(GstBus* bus, GstMessage* msg, gpointer data);
-void warn_handler(GstBus* bus, GstMessage* msg, gpointer data);
-void eos_handler(GstBus* bus, GstMessage* msg, gpointer data);
-void have_type(GstElement* typefind, guint probability, GstCaps* caps, gpointer user_data);
-void deep_element_stuff(GstBin* self, GstBin* sub_bin, GstElement* element, gpointer data);
-void element_stuff(GstBin* self, GstElement* element, gpointer data);
+#include "g-bus.h"
 
 //external prototypes
 extern void eos_changer(void);

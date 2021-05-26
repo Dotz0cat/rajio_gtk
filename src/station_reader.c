@@ -18,18 +18,7 @@ This file is part of Rajio.
 */
 
 #include "rajio.h"
-
-//prototypes 
-int append_new_station(char* file_name, int id, char* name, char* thumbnail, int num_of_addresses);
-int append_new_address(char* file_name, int id, char* address);
-char* read_station_name(char* file_name, int id);
-char* read_station_thumbnail(char* file_name, int id);
-int get_highest_id(char* file_name);
-char* get_address(char* file_name, int id);
-int local_exsits(const char* file_name);
-int makeDB(const char* file_name);
-char* address_reroll(const char* file_name, int station_id, int reroll);
-int get_num_of_addresses(const char* file_name, int id);
+#include "station_reader.h"
 
 int append_new_station(char* file_name, int id, char* name, char* thumbnail, int num_of_addresses) {
 	sqlite3* db;

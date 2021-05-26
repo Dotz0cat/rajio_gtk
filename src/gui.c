@@ -18,11 +18,9 @@ This file is part of Rajio.
 */
 
 #include "rajio.h"
+#include "gui.h"
 
-//UIWidgets* build_gui(GtkApplication* app);
-DialogWidgets* build_dialog(GtkWidget* window);
-
-/*UIWidgets* build_gui(GtkApplication* app, UIWidgets* UI) {
+UIWidgets* build_gui(GtkApplication* app, UIWidgets* UI) {
 	//UIWidgets* UI = malloc(sizeof(UIWidgets));
 
 	UI->window = gtk_application_window_new(app);
@@ -76,7 +74,7 @@ DialogWidgets* build_dialog(GtkWidget* window);
 	gtk_widget_set_valign(UI->station_add, GTK_ALIGN_CENTER);
 
 	return UI;
-}*/
+}
 
 DialogWidgets* build_dialog(GtkWidget* window) {
 	DialogWidgets* UI = malloc(sizeof(DialogWidgets));
