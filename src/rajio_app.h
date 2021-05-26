@@ -17,23 +17,23 @@ This file is part of Rajio.
     along with Rajio.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef __CAT_APPLICATION_H__
-#define __CAT_APPLICATION_H__
+#ifndef __RAJIO_APP_H__
+#define __RAJIO_APP_H__
 
 //clang is loud
 #pragma clang diagnostic ignored "-Weverything"
 #include <gtk/gtk.h>
 #pragma clang diagnostic pop
 
-#define CAT_TYPE_APPLICATION             (cat_application_get_type())
-#define CAT_APPLICATION(obj)             (G_TYPE_CHECK_INSTANCE_CAST((obj), CAT_TYPE_APPLICATION, CatApplication))
+#define CAT_TYPE_RAJIO_APP              (rajio_app_get_type())
+#define RAJIO_APP(obj)                  (G_TYPE_CHECK_INSTANCE_CAST((obj), CAT_TYPE_RAJIO_APP, RajioApp))
 
 
 
 
-typedef struct _CatApplication CatApplication;
-typedef struct _CatApplicationClass CatApplicationClass;
-typedef struct _CatApplicationPrivate CatApplicationPrivate;
+typedef struct _RajioApp RajioApp;
+typedef struct _RajioAppClass RajioAppClass;
+typedef struct _RajioAppPrivate RajioAppPrivate;
 
 typedef struct _UIWidgets UIWidgets;
 
@@ -48,21 +48,21 @@ struct _UIWidgets {
     GtkWidget* stop;
 };
 
-struct _CatApplication {
+struct _RajioApp {
     GtkApplication parent;
 
-    CatApplicationPrivate* priv;
+    RajioAppPrivate* priv;
 };
 
-struct _CatApplicationClass {
+struct _RajioAppClass {
     GtkApplicationClass parent_class;
 };
 
-struct _CatApplicationPrivate {
+struct _RajioAppPrivate {
     UIWidgets* UI;
 };
 
-GType cat_application_get_type(void);
-GtkApplication* cat_application_new(void);
+GType rajio_app_get_type(void);
+GtkApplication* rajio_app_new(void);
 
-#endif /* __CAT_APPLICATION_H__ */
+#endif /* __RAJIO_APP_H__ */

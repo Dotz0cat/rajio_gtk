@@ -17,12 +17,12 @@ This file is part of Rajio.
     along with Rajio.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "cat_application.h"
+#include "rajio_app.h"
 
-G_DEFINE_TYPE_WITH_CODE(CatApplication, cat_application, GTK_TYPE_APPLICATION, G_ADD_PRIVATE(CatApplication));
+G_DEFINE_TYPE_WITH_CODE(RajioApp, rajio_app, GTK_TYPE_APPLICATION, G_ADD_PRIVATE(RajioApp));
 
-static void cat_application_init(CatApplication* app) {
-    app->priv = cat_application_get_instance_private(app);
+static void rajio_app_init(RajioApp* app) {
+    app->priv = rajio_app_get_instance_private(app);
     app->priv->UI = malloc(sizeof(UIWidgets));
 }
 
@@ -30,10 +30,10 @@ static void cat_application_init(CatApplication* app) {
   g_application_quit(G_APPLICATION(app));
 }*/
 
-static void cat_application_activate(GApplication* app) {
-    //CAT_APPLICATION(app)->UI = build_gui(app, app->UI);
+static void rajio_app_activate(GApplication* app) {
+    //RAJIO_APP(app)->UI = build_gui(app, app->UI);
 
-    UIWidgets* UI = CAT_APPLICATION(app)->priv->UI;
+    UIWidgets* UI = RAJIO_APP(app)->priv->UI;
 
     UI->window = gtk_application_window_new(app);
 
@@ -87,14 +87,14 @@ static void cat_application_activate(GApplication* app) {
 
 }
 
-static void cat_application_class_init(CatApplicationClass* class) {
-    G_APPLICATION_CLASS(class)->activate = cat_application_activate;
+static void rajio_app_class_init(RajioAppClass* class) {
+    G_APPLICATION_CLASS(class)->activate = rajio_app_activate;
 }
 
-GtkApplication* cat_application_new(void) {
-    return g_object_new(CAT_TYPE_APPLICATION, "application_id", "net.cat.rajio", "flags", G_APPLICATION_FLAGS_NONE, NULL);
+GtkApplication* rajio_app_new(void) {
+    return g_object_new(CAT_TYPE_RAJIO_APP, "application_id", "net.cat.rajio", "flags", G_APPLICATION_FLAGS_NONE, NULL);
 }
 
-UIWidgets* cat_application_get_gui(CatApplication* app) {
+UIWidgets* rajio_app_get_gui(RajioApp* app) {
     return app->priv->UI;
 }

@@ -32,7 +32,7 @@ This file is part of Rajio.
 #include <sys/stat.h>
 
 #include "gtk/station_button.h"
-#include "gtk/cat_application.h"
+#include "rajio_app.h"
 
 extern int most_recent_id;
 extern CatStationFile most_recent_file;

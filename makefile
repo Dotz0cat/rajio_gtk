@@ -1,5 +1,5 @@
 #CC=gcc
-CFLAGS?= -O2 -g 
+CFLAGS?= -O2 -g -Weverything
 CPPFLAGS= $(shell pkg-config --cflags gtk+-3.0 gstreamer-1.0)
 LDLIBS= $(shell pkg-config --libs gtk+-3.0 sqlite3 gstreamer-1.0)
 
@@ -7,8 +7,8 @@ SRCDIR= src
 OBJDIR= obj
 PREFIX?= /usr/local
 
-build: $(OBJDIR) $(SRCDIR)/rajio.h $(OBJDIR)/main.o $(OBJDIR)/parser.o $(OBJDIR)/station_reader.o $(OBJDIR)/g-bus.o $(SRCDIR)/gtk/station_button.h $(OBJDIR)/gtk/station_button.o $(OBJDIR)/gui.o $(OBJDIR)/gtk/cat_application.o
-	@$(CC) $(CFLAGS) $(CPPFLAGS) $(OBJDIR)/main.o $(OBJDIR)/parser.o $(OBJDIR)/station_reader.o $(OBJDIR)/g-bus.o $(OBJDIR)/gtk/station_button.o $(OBJDIR)/gui.o $(OBJDIR)/gtk/cat_application.o -o rajio $(LDLIBS) $(LDFLAGS)
+build: $(OBJDIR) $(SRCDIR)/rajio.h $(OBJDIR)/main.o $(OBJDIR)/parser.o $(OBJDIR)/station_reader.o $(OBJDIR)/g-bus.o $(SRCDIR)/gtk/station_button.h $(OBJDIR)/gtk/station_button.o $(OBJDIR)/gui.o $(OBJDIR)/rajio_app.o
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(OBJDIR)/main.o $(OBJDIR)/parser.o $(OBJDIR)/station_reader.o $(OBJDIR)/g-bus.o $(OBJDIR)/gtk/station_button.o $(OBJDIR)/gui.o $(OBJDIR)/rajio_app.o -o rajio $(LDLIBS) $(LDFLAGS)
 
 $(OBJDIR):
 	@mkdir $(OBJDIR)
@@ -32,8 +32,8 @@ $(OBJDIR)/gtk/station_button.o: $(SRCDIR)/gtk/station_button.c
 $(OBJDIR)/gui.o: $(SRCDIR)/gui.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $(SRCDIR)/gui.c -o $(OBJDIR)/gui.o
 
-$(OBJDIR)/gtk/cat_application.o: $(SRCDIR)/gtk/cat_application.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $(SRCDIR)/gtk/cat_application.c -o $(OBJDIR)/gtk/cat_application.o
+$(OBJDIR)/rajio_app.o: $(SRCDIR)/rajio_app.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $(SRCDIR)/rajio_app.c -o $(OBJDIR)/rajio_app.o
 
 install: build
 	install -D rajio -t ${DESTDIR}${PREFIX}/bin
@@ -48,7 +48,7 @@ clean:
 	-rm $(OBJDIR)/g-bus.o 
 	-rm $(OBJDIR)/gui.o
 	-rm $(OBJDIR)/gtk/station_button.o
-	-rm $(OBJDIR)/gtk/cat_application.o
+	-rm $(OBJDIR)/rajio_app.o
 	-rmdir $(OBJDIR)/gtk
 	-rmdir $(OBJDIR)
 

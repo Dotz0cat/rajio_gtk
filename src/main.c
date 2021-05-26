@@ -102,7 +102,7 @@ int main(int argc, char* argv[]) {
 
     GtkApplication* app;
 
-    app = cat_application_new();
+    app = rajio_app_new();
 
     pipeline = gst_element_factory_make("playbin", NULL);
 
@@ -112,7 +112,7 @@ int main(int argc, char* argv[]) {
 
     set_message_handlers(bus);
 
-    UI = cat_application_get_gui(CAT_APPLICATION(app));
+    UI = rajio_app_get_gui(RAJIO_APP(app));
 
     sleep(30);
 
