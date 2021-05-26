@@ -114,6 +114,8 @@ int main(int argc, char* argv[]) {
 
     UI = cat_application_get_gui(CAT_APPLICATION(app));
 
+    sleep(30);
+
     //gtk_application_add_window(app, GTK_WINDOW(UI->window));
 
     gtk_window_set_default_size(GTK_WINDOW(UI->window), 1000, 400);

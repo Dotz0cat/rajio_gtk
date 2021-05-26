@@ -19,12 +19,11 @@ This file is part of Rajio.
 
 #include "cat_application.h"
 
-extern UIWidgets* build_gui(GtkApplication* app, UIWidgets* UI);
-
-G_DEFINE_TYPE(CatApplication, cat_application, CAT_TYPE_APPLICATION);
+G_DEFINE_TYPE_WITH_CODE(CatApplication, cat_application, GTK_TYPE_APPLICATION, G_ADD_PRIVATE(CatApplication));
 
 static void cat_application_init(CatApplication* app) {
-    app->UI = malloc(sizeof(UIWidgets));
+    app->priv = cat_application_get_instance_private(app);
+    app->priv->UI = malloc(sizeof(UIWidgets));
 }
 
 /*static void quit_activated(GSimpleAction* action, GVariant* parameter, gpointer app) {
@@ -34,55 +33,58 @@ static void cat_application_init(CatApplication* app) {
 static void cat_application_activate(GApplication* app) {
     //CAT_APPLICATION(app)->UI = build_gui(app, app->UI);
 
-    CAT_APPLICATION(app)->UI->window = gtk_application_window_new(app);
+    UIWidgets* UI = CAT_APPLICATION(app)->priv->UI;
+
+    UI->window = gtk_application_window_new(app);
 
     GtkWidget* main_box;
     main_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
-    gtk_container_add(GTK_CONTAINER(CAT_APPLICATION(app)->UI->window), main_box);
+    gtk_container_add(GTK_CONTAINER(UI->window), main_box);
 
     GtkWidget* scrolled = gtk_scrolled_window_new(NULL, NULL);
     gtk_widget_set_valign(scrolled, GTK_ALIGN_FILL);
 
     gtk_box_pack_start(GTK_BOX(main_box), scrolled, TRUE, TRUE, 0);
 
-    CAT_APPLICATION(app)->UI->flow = gtk_flow_box_new();
+    UI->flow = gtk_flow_box_new();
 
-    gtk_container_add(GTK_CONTAINER(scrolled), CAT_APPLICATION(app)->UI->flow);
-    gtk_flow_box_set_selection_mode(GTK_FLOW_BOX(CAT_APPLICATION(app)->UI->flow), GTK_SELECTION_NONE);
+    gtk_container_add(GTK_CONTAINER(scrolled), UI->flow);
+    gtk_flow_box_set_selection_mode(GTK_FLOW_BOX(UI->flow), GTK_SELECTION_NONE);
 
     GtkWidget* second_box;
     second_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
     gtk_box_pack_end(GTK_BOX(main_box), second_box, FALSE, FALSE, 0);
 
-    CAT_APPLICATION(app)->UI->station_image = gtk_image_new_from_icon_name("audio-x-generic", GTK_ICON_SIZE_BUTTON);
+    UI->station_image = gtk_image_new_from_icon_name("audio-x-generic", GTK_ICON_SIZE_BUTTON);
 
-    gtk_widget_set_margin_start(GTK_WIDGET(CAT_APPLICATION(app)->UI->station_image), 10);
-    gtk_widget_set_margin_bottom(GTK_WIDGET(CAT_APPLICATION(app)->UI->station_image), 10);
-    gtk_widget_set_margin_top(GTK_WIDGET(CAT_APPLICATION(app)->UI->station_image), 10);
+    gtk_widget_set_margin_start(GTK_WIDGET(UI->station_image), 10);
+    gtk_widget_set_margin_bottom(GTK_WIDGET(UI->station_image), 10);
+    gtk_widget_set_margin_top(GTK_WIDGET(UI->station_image), 10);
 
-    gtk_box_pack_start(GTK_BOX(second_box), CAT_APPLICATION(app)->UI->station_image, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(second_box), UI->station_image, FALSE, FALSE, 0);
 
-    CAT_APPLICATION(app)->UI->station_label = gtk_label_new("No Station Playing");
+    UI->station_label = gtk_label_new("No Station Playing");
 
-    gtk_box_set_center_widget(GTK_BOX(second_box), CAT_APPLICATION(app)->UI->station_label);
-    gtk_widget_set_halign(CAT_APPLICATION(app)->UI->station_label, GTK_ALIGN_CENTER);
-    gtk_widget_set_valign(CAT_APPLICATION(app)->UI->station_label, GTK_ALIGN_CENTER);
+    gtk_box_set_center_widget(GTK_BOX(second_box), UI->station_label);
+    gtk_widget_set_halign(UI->station_label, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(UI->station_label, GTK_ALIGN_CENTER);
 
-    CAT_APPLICATION(app)->UI->station_add = gtk_button_new_from_icon_name("value-increase-symbolic", GTK_ICON_SIZE_BUTTON);
-    CAT_APPLICATION(app)->UI->pause = gtk_button_new_from_icon_name("media-playback-pause-symbolic", GTK_ICON_SIZE_BUTTON);
-    CAT_APPLICATION(app)->UI->play = gtk_button_new_from_icon_name("media-playback-start-symbolic", GTK_ICON_SIZE_BUTTON);
-    CAT_APPLICATION(app)->UI->stop = gtk_button_new_from_icon_name("media-playback-stop-symbolic", GTK_ICON_SIZE_BUTTON);
+    UI->station_add = gtk_button_new_from_icon_name("value-increase-symbolic", GTK_ICON_SIZE_BUTTON);
+    UI->pause = gtk_button_new_from_icon_name("media-playback-pause-symbolic", GTK_ICON_SIZE_BUTTON);
+    UI->play = gtk_button_new_from_icon_name("media-playback-start-symbolic", GTK_ICON_SIZE_BUTTON);
+    UI->stop = gtk_button_new_from_icon_name("media-playback-stop-symbolic", GTK_ICON_SIZE_BUTTON);
 
-    gtk_box_pack_end(GTK_BOX(second_box), CAT_APPLICATION(app)->UI->stop, FALSE, FALSE, 0);
-    gtk_widget_set_valign(CAT_APPLICATION(app)->UI->stop, GTK_ALIGN_CENTER);
-    gtk_box_pack_end(GTK_BOX(second_box), CAT_APPLICATION(app)->UI->play, FALSE, FALSE, 0);
-    gtk_widget_set_valign(CAT_APPLICATION(app)->UI->play, GTK_ALIGN_CENTER);
-    gtk_box_pack_end(GTK_BOX(second_box), CAT_APPLICATION(app)->UI->pause, FALSE, FALSE, 0);
-    gtk_widget_set_valign(CAT_APPLICATION(app)->UI->pause, GTK_ALIGN_CENTER);
-    gtk_box_pack_end(GTK_BOX(second_box), CAT_APPLICATION(app)->UI->station_add, FALSE, FALSE, 0);
-    gtk_widget_set_valign(CAT_APPLICATION(app)->UI->station_add, GTK_ALIGN_CENTER);
+    gtk_box_pack_end(GTK_BOX(second_box), UI->stop, FALSE, FALSE, 0);
+    gtk_widget_set_valign(UI->stop, GTK_ALIGN_CENTER);
+    gtk_box_pack_end(GTK_BOX(second_box), UI->play, FALSE, FALSE, 0);
+    gtk_widget_set_valign(UI->play, GTK_ALIGN_CENTER);
+    gtk_box_pack_end(GTK_BOX(second_box), UI->pause, FALSE, FALSE, 0);
+    gtk_widget_set_valign(UI->pause, GTK_ALIGN_CENTER);
+    gtk_box_pack_end(GTK_BOX(second_box), UI->station_add, FALSE, FALSE, 0);
+    gtk_widget_set_valign(UI->station_add, GTK_ALIGN_CENTER);
+
 }
 
 static void cat_application_class_init(CatApplicationClass* class) {
@@ -94,5 +96,5 @@ GtkApplication* cat_application_new(void) {
 }
 
 UIWidgets* cat_application_get_gui(CatApplication* app) {
-    return app->UI;
+    return app->priv->UI;
 }

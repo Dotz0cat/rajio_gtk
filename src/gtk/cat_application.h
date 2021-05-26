@@ -33,7 +33,7 @@ This file is part of Rajio.
 
 typedef struct _CatApplication CatApplication;
 typedef struct _CatApplicationClass CatApplicationClass;
-//typedef struct _CatApplicationPrivate CatApplicationPrivate;
+typedef struct _CatApplicationPrivate CatApplicationPrivate;
 
 typedef struct _UIWidgets UIWidgets;
 
@@ -51,25 +51,16 @@ struct _UIWidgets {
 struct _CatApplication {
     GtkApplication parent;
 
-    UIWidgets* UI;
-
-    //GtkApplicationPrivate* priv;
+    CatApplicationPrivate* priv;
 };
 
 struct _CatApplicationClass {
     GtkApplicationClass parent_class;
 };
 
-/*struct _CatApplicationPrivate {
-    GtkWidget* window;
-    GtkWidget* flow;
-    GtkWidget* station_image;
-    GtkWidget* station_label;
-    GtkWidget* station_add;
-    GtkWidget* pause;
-    GtkWidget* play;
-    GtkWidget* stop;
-};*/
+struct _CatApplicationPrivate {
+    UIWidgets* UI;
+};
 
 GType cat_application_get_type(void);
 GtkApplication* cat_application_new(void);
