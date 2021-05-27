@@ -19,16 +19,13 @@ This file is part of Rajio.
 
 #include "rajio.h"
 #include "g-bus.h"
+#include "parser.h"
 
-//external prototypes
-extern void eos_changer(void);
-extern int genaric_regex(const char* string, const char* regex_string);
-
-void set_message_handlers(GstBus* bus) {
+void set_message_handlers(GstBus* bus, RajioApp* app) {
 	gst_bus_add_signal_watch_full(bus, G_PRIORITY_DEFAULT);
 	g_signal_connect(bus, "message::error", G_CALLBACK(error_handler), NULL);
 	g_signal_connect(bus, "message::warning", G_CALLBACK(warn_handler), NULL);
-	g_signal_connect(bus, "message::eos", G_CALLBACK(eos_handler), NULL);
+	g_signal_connect(bus, "message::eos", G_CALLBACK(eos_handler), app);
 	g_signal_connect(pipeline, "deep-element-added", G_CALLBACK(deep_element_stuff), NULL);
 	g_signal_connect(pipeline, "element-added", G_CALLBACK(element_stuff), NULL);
 
@@ -55,9 +52,9 @@ void warn_handler(GstBus* bus, GstMessage* msg, gpointer data) {
 }
 
 void eos_handler(GstBus* bus, GstMessage* msg, gpointer data) {
-	gst_element_set_state(pipeline, GST_STATE_READY);
+	gst_element_set_state(rajio_app_get_pipeline(RAJIO_APP(data)), GST_STATE_READY);
 
-	eos_changer();
+	eos_changer(RAJIO_APP(data));
 
 	return;
 }

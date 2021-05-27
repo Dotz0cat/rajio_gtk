@@ -17,10 +17,12 @@ This file is part of Rajio.
     along with Rajio.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-void set_message_handlers(GstBus* bus, RajioApp* app);
-void error_handler(GstBus* bus, GstMessage* msg, gpointer data);
-void warn_handler(GstBus* bus, GstMessage* msg, gpointer data);
-void eos_handler(GstBus* bus, GstMessage* msg, gpointer data);
-void have_type(GstElement* typefind, guint probability, GstCaps* caps, gpointer user_data);
-void deep_element_stuff(GstBin* self, GstBin* sub_bin, GstElement* element, gpointer data);
-void element_stuff(GstBin* self, GstElement* element, gpointer data);
+void localDB(RajioApp* app);
+void add_station(GtkWidget* flowbox, char* station_name, char* image_file, int id, CatStationFile station_file);
+void station_adder(char* file_name, GtkWidget* flow, CatStationFile station_file);
+int stop_playing(RajioApp* app);
+int start_playing(int station_id, CatStationFile file, RajioApp* app);
+void change_station_playing_image(char* thumbnail, GtkWidget* station_image);
+GtkWidget* make_image_from_resource(const char* address, int x, int y);
+void eos_changer(RajioApp* app);
+int start_playing_with_reroll(int station_id, int reroll, CatStationFile file, RajioApp* app);

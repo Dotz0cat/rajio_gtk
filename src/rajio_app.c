@@ -18,6 +18,7 @@ This file is part of Rajio.
 */
 
 #include "rajio_app.h"
+#include "helpers.h"
 
 G_DEFINE_TYPE_WITH_CODE(RajioApp, rajio_app, GTK_TYPE_APPLICATION, G_ADD_PRIVATE(RajioApp));
 
@@ -26,69 +27,49 @@ static void rajio_app_init(RajioApp* app) {
     app->priv->UI = malloc(sizeof(UIWidgets));
 }
 
-/*static void quit_activated(GSimpleAction* action, GVariant* parameter, gpointer app) {
-  g_application_quit(G_APPLICATION(app));
-}*/
-
 static void rajio_app_activate(GApplication* app) {
-    //RAJIO_APP(app)->UI = build_gui(app, app->UI);
+    RAJIO_APP(app)->priv->UI = build_gui(app, app->UI);
 
     UIWidgets* UI = RAJIO_APP(app)->priv->UI;
 
-    UI->window = gtk_application_window_new(app);
+    gtk_window_set_default_size(GTK_WINDOW(UI->window), 1000, 400);
 
-    GtkWidget* main_box;
-    main_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    //add the staion images and names to the flowbox
+    station_adder(rajio_app_get_system_file(RAJIO_APP(app)), UI->flow, SYSTEM);
+    station_adder(rajio_app_get_local_file(RAJIO_APP(app)), UI->flow, LOCAL);
 
-    gtk_container_add(GTK_CONTAINER(UI->window), main_box);
+    //add a dioluge popup to the add station button
 
-    GtkWidget* scrolled = gtk_scrolled_window_new(NULL, NULL);
-    gtk_widget_set_valign(scrolled, GTK_ALIGN_FILL);
+    add_other_button_callbacks(UI, RAJIO_APP(app));
 
-    gtk_box_pack_start(GTK_BOX(main_box), scrolled, TRUE, TRUE, 0);
+    //gtk_button_set_relief(GTK_BUTTON(station_add), GTK_RELIEF_NONE);
 
-    UI->flow = gtk_flow_box_new();
+    //makes the window close
+    g_signal_connect(UI->window, "delete-event", G_CALLBACK (delete_event), NULL);
+    g_signal_connect(UI->window, "destroy", G_CALLBACK (destroy), NULL);
 
-    gtk_container_add(GTK_CONTAINER(scrolled), UI->flow);
-    gtk_flow_box_set_selection_mode(GTK_FLOW_BOX(UI->flow), GTK_SELECTION_NONE);
+    gtk_widget_show_all(UI->window);
+    gtk_widget_hide(UI->play);
+    gtk_widget_hide(UI->stop);
+    gtk_widget_hide(UI->pause);
 
-    GtkWidget* second_box;
-    second_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+}
 
-    gtk_box_pack_end(GTK_BOX(main_box), second_box, FALSE, FALSE, 0);
+static void rajio_app_startup(GApplication* app) {
+    GstBus* bus;
 
-    UI->station_image = gtk_image_new_from_icon_name("audio-x-generic", GTK_ICON_SIZE_BUTTON);
+    app->priv->pipeline = gst_element_factory_make("playbin", NULL);
 
-    gtk_widget_set_margin_start(GTK_WIDGET(UI->station_image), 10);
-    gtk_widget_set_margin_bottom(GTK_WIDGET(UI->station_image), 10);
-    gtk_widget_set_margin_top(GTK_WIDGET(UI->station_image), 10);
+    bus = gst_element_get_bus(app->priv->pipeline);
 
-    gtk_box_pack_start(GTK_BOX(second_box), UI->station_image, FALSE, FALSE, 0);
+    set_message_handlers(bus);
 
-    UI->station_label = gtk_label_new("No Station Playing");
-
-    gtk_box_set_center_widget(GTK_BOX(second_box), UI->station_label);
-    gtk_widget_set_halign(UI->station_label, GTK_ALIGN_CENTER);
-    gtk_widget_set_valign(UI->station_label, GTK_ALIGN_CENTER);
-
-    UI->station_add = gtk_button_new_from_icon_name("value-increase-symbolic", GTK_ICON_SIZE_BUTTON);
-    UI->pause = gtk_button_new_from_icon_name("media-playback-pause-symbolic", GTK_ICON_SIZE_BUTTON);
-    UI->play = gtk_button_new_from_icon_name("media-playback-start-symbolic", GTK_ICON_SIZE_BUTTON);
-    UI->stop = gtk_button_new_from_icon_name("media-playback-stop-symbolic", GTK_ICON_SIZE_BUTTON);
-
-    gtk_box_pack_end(GTK_BOX(second_box), UI->stop, FALSE, FALSE, 0);
-    gtk_widget_set_valign(UI->stop, GTK_ALIGN_CENTER);
-    gtk_box_pack_end(GTK_BOX(second_box), UI->play, FALSE, FALSE, 0);
-    gtk_widget_set_valign(UI->play, GTK_ALIGN_CENTER);
-    gtk_box_pack_end(GTK_BOX(second_box), UI->pause, FALSE, FALSE, 0);
-    gtk_widget_set_valign(UI->pause, GTK_ALIGN_CENTER);
-    gtk_box_pack_end(GTK_BOX(second_box), UI->station_add, FALSE, FALSE, 0);
-    gtk_widget_set_valign(UI->station_add, GTK_ALIGN_CENTER);
-
+    localDB(RAJIO_APP(app));
 }
 
 static void rajio_app_class_init(RajioAppClass* class) {
     G_APPLICATION_CLASS(class)->activate = rajio_app_activate;
+    G_APPLICATION_CLASS(class)->startup = rajio_app_startup;
 }
 
 GtkApplication* rajio_app_new(void) {
@@ -97,4 +78,56 @@ GtkApplication* rajio_app_new(void) {
 
 UIWidgets* rajio_app_get_gui(RajioApp* app) {
     return app->priv->UI;
+}
+
+char* rajio_app_get_local_file(RajioApp* app) {
+    return app->priv->local_file;
+}
+
+void rajio_app_set_local_file(RajioApp* app, char* file) {
+    app->priv->local_file = file;
+}
+
+char* rajio_app_get_system_file(RajioApp* app) {
+    return app->priv->system_file;
+}
+
+void rajio_app_set_system_file(RajioApp* app, char* file) {
+    app->priv->system_file = file;
+}
+
+int rajio_app_get_most_recent_id(RajioApp* app) {
+    return app->priv->most_recent_id;
+}
+
+void rajio_app_set_most_recent_id(RajioApp* app, int id) {
+    app->most_recent_id = id;
+}
+
+CatStationFile rajio_app_get_most_recent_file(RajioApp* app) {
+    return app->priv->most_recent_file;
+}
+
+void rajio_app_set_most_recent_file(RajioApp* app, CatStationFile file) {
+    app->priv->most_recent_file = file;
+}
+
+GstElement* rajio_app_get_pipeline(RajioApp* app) {
+    return app->priv->pipeline;
+}
+
+int rajio_app_get_most_recent_reroll(RajioApp* app) {
+    return app->priv->most_recent_reroll;
+}
+
+void rajio_app_set_most_recent_reroll(RajioApp* app, int reroll) {
+    app->priv->most_recent_reroll = reroll;
+}
+
+void rajio_app_increment_most_recent_reroll(RajioApp* app) {
+    app->priv->most_recent_reroll++;
+}
+
+void rajio_app_increment_most_recent_id(RajioApp* app) {
+    app->priv->most_recent_id++;
 }

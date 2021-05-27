@@ -29,10 +29,6 @@ This file is part of Rajio.
 #include "parser.h"
 #include "station_reader.h"
 
-//external prototypes
-extern int append_new_address(char* file_name, int id, char* address);
-extern int get_highest_id(char* file_name);
-
 int add_stations(char* file_name, char* sql_file) {
 	char string[512];
 

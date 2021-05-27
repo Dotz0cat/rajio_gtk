@@ -34,11 +34,6 @@ This file is part of Rajio.
 #include "gtk/station_button.h"
 #include "rajio_app.h"
 
-extern int most_recent_id;
-extern CatStationFile most_recent_file;
-extern int most_recent_reroll;
-extern GstElement* pipeline;
-
 typedef struct _img_and_dims img_and_dims;
 
 struct _img_and_dims {

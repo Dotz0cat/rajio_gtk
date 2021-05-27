@@ -7,8 +7,8 @@ SRCDIR= src
 OBJDIR= obj
 PREFIX?= /usr/local
 
-build: $(OBJDIR) $(SRCDIR)/rajio.h $(OBJDIR)/main.o $(OBJDIR)/parser.o $(OBJDIR)/station_reader.o $(OBJDIR)/g-bus.o $(SRCDIR)/gtk/station_button.h $(OBJDIR)/gtk/station_button.o $(OBJDIR)/gui.o $(OBJDIR)/rajio_app.o
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(OBJDIR)/main.o $(OBJDIR)/parser.o $(OBJDIR)/station_reader.o $(OBJDIR)/g-bus.o $(OBJDIR)/gtk/station_button.o $(OBJDIR)/gui.o $(OBJDIR)/rajio_app.o -o rajio $(LDLIBS) $(LDFLAGS)
+build: $(OBJDIR) $(SRCDIR)/rajio.h $(OBJDIR)/main.o $(OBJDIR)/parser.o $(OBJDIR)/station_reader.o $(OBJDIR)/g-bus.o $(SRCDIR)/gtk/station_button.h $(OBJDIR)/gtk/station_button.o $(OBJDIR)/gui.o $(OBJDIR)/rajio_app.o $(OBJDIR)/helpers.o $(OBJDIR)/callbacks.o
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(OBJDIR)/main.o $(OBJDIR)/parser.o $(OBJDIR)/station_reader.o $(OBJDIR)/g-bus.o $(OBJDIR)/gtk/station_button.o $(OBJDIR)/gui.o $(OBJDIR)/rajio_app.o $(OBJDIR)/helpers.o $(OBJDIR)/callbacks.o -o rajio $(LDLIBS) $(LDFLAGS)
 
 $(OBJDIR):
 	@mkdir $(OBJDIR)
@@ -35,6 +35,12 @@ $(OBJDIR)/gui.o: $(SRCDIR)/gui.c
 $(OBJDIR)/rajio_app.o: $(SRCDIR)/rajio_app.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $(SRCDIR)/rajio_app.c -o $(OBJDIR)/rajio_app.o
 
+$(OBJDIR)/helpers.o: $(SRCDIR)/helpers.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $(SRCDIR)/helpers.c -o $(OBJDIR)/helpers.o
+
+$(OBJDIR)/callbacks.o: $(SRCDIR)/callbacks.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $(SRCDIR)/callbacks.c -o $(OBJDIR)/callbacks.o
+
 install: build
 	install -D rajio -t ${DESTDIR}${PREFIX}/bin
 	install -D stations -t ${DESTDIR}${PREFIX}/share/rajio
@@ -49,6 +55,8 @@ clean:
 	-rm $(OBJDIR)/gui.o
 	-rm $(OBJDIR)/gtk/station_button.o
 	-rm $(OBJDIR)/rajio_app.o
+	-rm $(OBJDIR)/helpers.o
+	-rm $(OBJDIR)/callbacks.o
 	-rmdir $(OBJDIR)/gtk
 	-rmdir $(OBJDIR)
 
