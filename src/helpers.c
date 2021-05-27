@@ -17,7 +17,6 @@ This file is part of Rajio.
     along with Rajio.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "rajio.h"
 #include "helpers.h"
 #include "station_reader.h"
 #include "callbacks.h"
@@ -60,7 +59,7 @@ void localDB(RajioApp* app) {
     rajio_app_set_local_file(app, local_station_file);
 }
 
-void add_station(GtkWidget* flowbox, char* station_name, char* image_file, int id, CatStationFile station_file) {
+void add_station(GtkWidget* flowbox, char* station_name, char* image_file, int id, CatStationFile station_file, RajioApp* app) {
     GtkWidget* grid;
 
     grid = gtk_grid_new();
@@ -88,7 +87,7 @@ void add_station(GtkWidget* flowbox, char* station_name, char* image_file, int i
     cat_station_button_set_id(button, id);
     cat_station_button_set_station_file(button, station_file);
 
-    add_button_callback(GTK_BUTTON(button));
+    add_button_callback(GTK_BUTTON(button), app);
 
     gtk_container_add(GTK_CONTAINER(button), grid);
 
@@ -98,7 +97,7 @@ void add_station(GtkWidget* flowbox, char* station_name, char* image_file, int i
     gtk_widget_show_all(button);
 }
 
-void station_adder(char* file_name, GtkWidget* flow, CatStationFile station_file) {
+void station_adder(char* file_name, GtkWidget* flow, CatStationFile station_file, RajioApp* app) {
     int max_station = get_highest_id(file_name);
 
     char* name;
@@ -107,7 +106,7 @@ void station_adder(char* file_name, GtkWidget* flow, CatStationFile station_file
     for (int i = 1; i < max_station+1; i++) {
         name = read_station_name(file_name, i);
         path = read_station_thumbnail(file_name, i);
-        add_station(flow, name, path, i, station_file);
+        add_station(flow, name, path, i, station_file, app);
         free(name);
         free(path);
     }
@@ -236,7 +235,7 @@ void eos_changer(RajioApp* app) {
     }
 
     if (get_num_of_addresses(file_name, rajio_app_get_most_recent_id(app)) > 1) {
-        if (rajio_app_get_most_recent_reroll(app) == get_num_of_addresses(file_name, most_recent_id)) {
+        if (rajio_app_get_most_recent_reroll(app) == get_num_of_addresses(file_name, rajio_app_get_most_recent_id(app))) {
 
             rajio_app_set_most_recent_reroll(app, 1);
 
@@ -274,7 +273,8 @@ void eos_changer(RajioApp* app) {
     }
 
     if (start_playing_with_reroll(rajio_app_get_most_recent_id(app), rajio_app_get_most_recent_reroll(app), rajio_app_get_most_recent_file(app), app) != 0) {
-        error_message_popup(rajio_app_get_gui(app)->window, "There was a error with rerolling");
+        //error_message_popup(rajio_app_get_gui(app)->window, "There was a error with rerolling");
+        fprintf(stderr, "There was a issue with rerolling\r\n");
     }
 }
 

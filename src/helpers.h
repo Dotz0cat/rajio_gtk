@@ -17,9 +17,14 @@ This file is part of Rajio.
     along with Rajio.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include "rajio_app.h"
+#include <pwd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
 void localDB(RajioApp* app);
-void add_station(GtkWidget* flowbox, char* station_name, char* image_file, int id, CatStationFile station_file);
-void station_adder(char* file_name, GtkWidget* flow, CatStationFile station_file);
+void add_station(GtkWidget* flowbox, char* station_name, char* image_file, int id, CatStationFile station_file, RajioApp* app);
+void station_adder(char* file_name, GtkWidget* flow, CatStationFile station_file, RajioApp* app);
 int stop_playing(RajioApp* app);
 int start_playing(int station_id, CatStationFile file, RajioApp* app);
 void change_station_playing_image(char* thumbnail, GtkWidget* station_image);

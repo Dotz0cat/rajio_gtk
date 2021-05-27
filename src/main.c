@@ -17,12 +17,13 @@ This file is part of Rajio.
     along with Rajio.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "rajio.h"
 //clang is loud
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Weverything"
 #include <gtk/gtk.h>
 #pragma clang diagnostic pop
+
+#include "rajio_app.h"
 
 //marcos
 #ifndef stations_file
@@ -91,7 +92,7 @@ int main(int argc, char* argv[]) {
 
     app = rajio_app_new();
 
-    rajio_app_set_sytem_file(stations_file);
+    rajio_app_set_system_file(RAJIO_APP(app), stations_file);
 
     return g_application_run(G_APPLICATION(app), argc, argv);
 }

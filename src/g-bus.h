@@ -17,6 +17,9 @@ This file is part of Rajio.
     along with Rajio.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <gstreamer-1.0/gst/gst.h>
+#include "rajio_app.h"
+
 void set_message_handlers(GstBus* bus, RajioApp* app);
 void error_handler(GstBus* bus, GstMessage* msg, gpointer data);
 void warn_handler(GstBus* bus, GstMessage* msg, gpointer data);

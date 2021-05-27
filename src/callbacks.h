@@ -17,6 +17,8 @@ This file is part of Rajio.
     along with Rajio.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include "rajio_app.h"
+
 void add_button_callback(GtkButton* button, RajioApp* app);
 static void event_box_clicked_cb(GtkWidget* widget, gpointer data);
 void add_other_button_callbacks(UIWidgets* UI, RajioApp* app);

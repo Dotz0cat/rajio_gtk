@@ -17,7 +17,6 @@ This file is part of Rajio.
     along with Rajio.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "rajio.h"
 #include "g-bus.h"
 #include "parser.h"
 
@@ -26,8 +25,8 @@ void set_message_handlers(GstBus* bus, RajioApp* app) {
 	g_signal_connect(bus, "message::error", G_CALLBACK(error_handler), NULL);
 	g_signal_connect(bus, "message::warning", G_CALLBACK(warn_handler), NULL);
 	g_signal_connect(bus, "message::eos", G_CALLBACK(eos_handler), app);
-	g_signal_connect(pipeline, "deep-element-added", G_CALLBACK(deep_element_stuff), NULL);
-	g_signal_connect(pipeline, "element-added", G_CALLBACK(element_stuff), NULL);
+	g_signal_connect(rajio_app_get_pipeline(app), "deep-element-added", G_CALLBACK(deep_element_stuff), NULL);
+	g_signal_connect(rajio_app_get_pipeline(app), "element-added", G_CALLBACK(element_stuff), NULL);
 
 }
 

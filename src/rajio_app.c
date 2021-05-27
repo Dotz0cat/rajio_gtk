@@ -28,25 +28,21 @@ static void rajio_app_init(RajioApp* app) {
 }
 
 static void rajio_app_activate(GApplication* app) {
-    RAJIO_APP(app)->priv->UI = build_gui(app, app->UI);
+    RAJIO_APP(app)->priv->UI = build_gui(app, RAJIO_APP(app)->priv->UI);
 
     UIWidgets* UI = RAJIO_APP(app)->priv->UI;
 
     gtk_window_set_default_size(GTK_WINDOW(UI->window), 1000, 400);
 
     //add the staion images and names to the flowbox
-    station_adder(rajio_app_get_system_file(RAJIO_APP(app)), UI->flow, SYSTEM);
-    station_adder(rajio_app_get_local_file(RAJIO_APP(app)), UI->flow, LOCAL);
+    station_adder(rajio_app_get_system_file(RAJIO_APP(app)), UI->flow, SYSTEM, RAJIO_APP(app));
+    station_adder(rajio_app_get_local_file(RAJIO_APP(app)), UI->flow, LOCAL, RAJIO_APP(app));
 
     //add a dioluge popup to the add station button
 
     add_other_button_callbacks(UI, RAJIO_APP(app));
 
     //gtk_button_set_relief(GTK_BUTTON(station_add), GTK_RELIEF_NONE);
-
-    //makes the window close
-    g_signal_connect(UI->window, "delete-event", G_CALLBACK (delete_event), NULL);
-    g_signal_connect(UI->window, "destroy", G_CALLBACK (destroy), NULL);
 
     gtk_widget_show_all(UI->window);
     gtk_widget_hide(UI->play);
@@ -58,9 +54,9 @@ static void rajio_app_activate(GApplication* app) {
 static void rajio_app_startup(GApplication* app) {
     GstBus* bus;
 
-    app->priv->pipeline = gst_element_factory_make("playbin", NULL);
+    RAJIO_APP(app)->priv->pipeline = gst_element_factory_make("playbin", NULL);
 
-    bus = gst_element_get_bus(app->priv->pipeline);
+    bus = gst_element_get_bus(RAJIO_APP(app)->priv->pipeline);
 
     set_message_handlers(bus);
 
@@ -101,7 +97,7 @@ int rajio_app_get_most_recent_id(RajioApp* app) {
 }
 
 void rajio_app_set_most_recent_id(RajioApp* app, int id) {
-    app->most_recent_id = id;
+    app->priv->most_recent_id = id;
 }
 
 CatStationFile rajio_app_get_most_recent_file(RajioApp* app) {

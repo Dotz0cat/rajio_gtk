@@ -17,7 +17,6 @@ This file is part of Rajio.
     along with Rajio.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "rajio.h"
 #include "callbacks.h"
 #include "gui.h"
 
@@ -100,7 +99,7 @@ static void button_clicked_cb(GtkWidget* widget, gpointer data) {
 
                 if (is_valid_url(address) == 0) {
                     num_of_addresses = 1;
-                    if (append_new_address(local_station_file, get_highest_id(local_station_file)+1, address) != 0) {
+                    if (append_new_address(rajio_app_get_local_file(RAJIO_APP(data)), get_highest_id(rajio_app_get_local_file(RAJIO_APP(data)))+1, address) != 0) {
                         fprintf(stderr, "There was a error adding a address to the table\r\n");
                     }
                 }
@@ -113,7 +112,7 @@ static void button_clicked_cb(GtkWidget* widget, gpointer data) {
             else {
                 //the use file button is toggled
                 char* address = gtk_editable_get_chars(GTK_EDITABLE(DIALOG->address_file_entry), 0, -1);
-                num_of_addresses = add_stations(address, local_station_file);
+                num_of_addresses = add_stations(address, rajio_app_get_local_file(RAJIO_APP(data)));
                 if (num_of_addresses <= 0) {
                     error_message_popup(DIALOG->dialog, "There was a error parsing the file provided\r\nor the file was not valid");
                     break;
@@ -125,11 +124,11 @@ static void button_clicked_cb(GtkWidget* widget, gpointer data) {
                 error_message_popup(DIALOG->dialog, "There was a issue somewhere");
             }
 
-            if (append_new_station(local_station_file, get_highest_id(local_station_file)+1, name_value, thumbnail_path, num_of_addresses) != 0) {
+            if (append_new_station(rajio_app_get_local_file(RAJIO_APP(data)), get_highest_id(rajio_app_get_local_file(RAJIO_APP(data)))+1, name_value, thumbnail_path, num_of_addresses) != 0) {
                 error_message_popup(DIALOG->dialog, "There was a error adding the station");
             }
 
-            add_station(UI->flow, name_value, thumbnail_path, get_highest_id(local_station_file), LOCAL);
+            add_station(rajio_app_get_gui(RAJIO_APP(data))->flow, name_value, thumbnail_path, get_highest_id(rajio_app_get_local_file(RAJIO_APP(data))), LOCAL, RAJIO_APP(data));
 
             g_free(name_value);
             free(thumbnail_path);

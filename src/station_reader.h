@@ -17,6 +17,8 @@ This file is part of Rajio.
     along with Rajio.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <sqlite3.h>
+
 int append_new_station(char* file_name, int id, char* name, char* thumbnail, int num_of_addresses);
 int append_new_address(char* file_name, int id, char* address);
 char* read_station_name(char* file_name, int id);

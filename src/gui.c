@@ -17,8 +17,8 @@ This file is part of Rajio.
     along with Rajio.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "rajio.h"
 #include "gui.h"
+#include "rajio_app.h"
 
 UIWidgets* build_gui(GtkApplication* app, UIWidgets* UI) {
 	//UIWidgets* UI = malloc(sizeof(UIWidgets));
