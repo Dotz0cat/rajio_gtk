@@ -20,8 +20,8 @@ This file is part of Rajio.
 #include "gui.h"
 #include "rajio_app.h"
 
-UIWidgets* build_gui(GtkApplication* app, UIWidgets* UI) {
-	//UIWidgets* UI = malloc(sizeof(UIWidgets));
+UIWidgets* build_gui(GtkApplication* app) {
+	UIWidgets* UI = malloc(sizeof(UIWidgets));
 
 	UI->window = gtk_application_window_new(app);
 
@@ -81,7 +81,7 @@ DialogWidgets* build_dialog(GtkWidget* window) {
 
     GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
 
-    UI->dialog = gtk_dialog_new_with_buttons("Add Station", window, flags, "Ok", GTK_RESPONSE_ACCEPT, "Cancel", GTK_RESPONSE_REJECT, NULL);
+    UI->dialog = gtk_dialog_new_with_buttons("Add Station", GTK_WINDOW(window), flags, "Ok", GTK_RESPONSE_ACCEPT, "Cancel", GTK_RESPONSE_REJECT, NULL);
 
     //make a grid and stuff and add stuff to it
     GtkWidget* content_area;

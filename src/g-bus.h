@@ -19,6 +19,7 @@ This file is part of Rajio.
 
 #include <gstreamer-1.0/gst/gst.h>
 #include "rajio_app.h"
+#include "helpers.h"
 
 void set_message_handlers(GstBus* bus, RajioApp* app);
 void error_handler(GstBus* bus, GstMessage* msg, gpointer data);

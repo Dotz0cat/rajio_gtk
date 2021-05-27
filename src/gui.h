@@ -20,5 +20,5 @@ This file is part of Rajio.
 #include "rajio.h"
 #include "rajio_app.h"
 
-UIWidgets* build_gui(GtkApplication* app, UIWidgets* UI);
+UIWidgets* build_gui(GtkApplication* app);
 DialogWidgets* build_dialog(GtkWidget* window);

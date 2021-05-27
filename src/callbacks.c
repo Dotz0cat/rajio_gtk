@@ -19,14 +19,18 @@ This file is part of Rajio.
 
 #include "callbacks.h"
 #include "gui.h"
+#include "parser.h"
+#include "station_reader.h"
+#include "helpers.h"
+#include "rajio_app.h"
 
 void add_button_callback(GtkButton* button, RajioApp* app) {
-    g_signal_connect(GTK_BUTTON(button), "button_press_event", G_CALLBACK(event_box_clicked_cb), (gpointer) app);
+    g_signal_connect(GTK_BUTTON(button), "button_press_event", G_CALLBACK(event_box_clicked_cb), app);
 }
 
 static void event_box_clicked_cb(GtkWidget* widget, gpointer data) {
-    int id = cat_station_button_get_id(widget);
-    CatStationFile file = cat_station_button_get_station_file(widget);
+    int id = cat_station_button_get_id(CAT_STATION_BUTTON(widget));
+    CatStationFile file = cat_station_button_get_station_file(CAT_STATION_BUTTON(widget));
 
     rajio_app_set_most_recent_id(RAJIO_APP(data), id);
     rajio_app_set_most_recent_file(RAJIO_APP(data), file);
@@ -54,8 +58,8 @@ static void button_clicked_cb(GtkWidget* widget, gpointer data) {
     char* thumbnail_path;
     int num_of_addresses;
 
-    g_signal_connect(DIALOG->thumbnail_chooser, "clicked", G_CALLBACK(file_chooser_thumbnail_clicked_cb), (gpointer) DIALOG);
-    g_signal_connect(DIALOG->address_file_chooser, "clicked", G_CALLBACK(file_chooser_address_clicked_cb), (gpointer) DIALOG);
+    g_signal_connect(DIALOG->thumbnail_chooser, "clicked", G_CALLBACK(file_chooser_thumbnail_clicked_cb), DIALOG);
+    g_signal_connect(DIALOG->address_file_chooser, "clicked", G_CALLBACK(file_chooser_address_clicked_cb), DIALOG);
 
     //show gtk stuff and enter a loop
     gtk_widget_show_all(DIALOG->dialog);
@@ -151,7 +155,7 @@ static void file_chooser_thumbnail_clicked_cb(GtkWidget* widget, gpointer dialog
 
     GtkWidget* chooser;
 
-    chooser = gtk_file_chooser_dialog_new("Open File", DIALOG->dialog, action, "Cancel", GTK_RESPONSE_CANCEL, "Ok", GTK_RESPONSE_ACCEPT, NULL);
+    chooser = gtk_file_chooser_dialog_new("Open File", GTK_WINDOW(DIALOG->dialog), action, "Cancel", GTK_RESPONSE_CANCEL, "Ok", GTK_RESPONSE_ACCEPT, NULL);
 
     int response = gtk_dialog_run(GTK_DIALOG(chooser));
 
@@ -176,7 +180,7 @@ static void file_chooser_address_clicked_cb(GtkWidget* widget, gpointer dialog) 
 
     GtkWidget* chooser;
 
-    chooser = gtk_file_chooser_dialog_new("Open File", DIALOG->dialog, action, "Cancel", GTK_RESPONSE_CANCEL, "Ok", GTK_RESPONSE_ACCEPT, NULL);
+    chooser = gtk_file_chooser_dialog_new("Open File", GTK_WINDOW(DIALOG->dialog), action, "Cancel", GTK_RESPONSE_CANCEL, "Ok", GTK_RESPONSE_ACCEPT, NULL);
 
     int response = gtk_dialog_run(GTK_DIALOG(chooser));
 

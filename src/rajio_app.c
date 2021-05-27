@@ -19,18 +19,25 @@ This file is part of Rajio.
 
 #include "rajio_app.h"
 #include "helpers.h"
+#include "callbacks.h"
+#include "g-bus.h"
+#include "gui.h"
 
 G_DEFINE_TYPE_WITH_CODE(RajioApp, rajio_app, GTK_TYPE_APPLICATION, G_ADD_PRIVATE(RajioApp));
 
 static void rajio_app_init(RajioApp* app) {
     app->priv = rajio_app_get_instance_private(app);
-    app->priv->UI = malloc(sizeof(UIWidgets));
+    app->priv->most_recent_id = 1;
+    app->priv->most_recent_reroll = 1;
+    app->priv->most_recent_file = LOCAL;
 }
 
 static void rajio_app_activate(GApplication* app) {
-    RAJIO_APP(app)->priv->UI = build_gui(app, RAJIO_APP(app)->priv->UI);
+    RAJIO_APP(app)->priv->UI = build_gui(GTK_APPLICATION(app));
 
-    UIWidgets* UI = RAJIO_APP(app)->priv->UI;
+    //UIWidgets* UI = RAJIO_APP(app)->priv->UI;
+
+    UIWidgets* UI = rajio_app_get_gui(RAJIO_APP(app));
 
     gtk_window_set_default_size(GTK_WINDOW(UI->window), 1000, 400);
 
@@ -52,13 +59,16 @@ static void rajio_app_activate(GApplication* app) {
 }
 
 static void rajio_app_startup(GApplication* app) {
+
+    G_APPLICATION_CLASS(rajio_app_parent_class)->startup(app);
+
     GstBus* bus;
 
     RAJIO_APP(app)->priv->pipeline = gst_element_factory_make("playbin", NULL);
 
     bus = gst_element_get_bus(RAJIO_APP(app)->priv->pipeline);
 
-    set_message_handlers(bus);
+    set_message_handlers(bus, RAJIO_APP(app));
 
     localDB(RAJIO_APP(app));
 }

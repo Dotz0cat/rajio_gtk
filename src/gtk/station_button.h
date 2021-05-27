@@ -26,8 +26,6 @@ This file is part of Rajio.
 #include <gtk/gtk.h>
 #pragma clang diagnostic pop
 
-G_BEGIN_DECLS
-
 #define CAT_TYPE_STATION_BUTTON				(cat_station_button_get_type())
 #define CAT_STATION_BUTTON(obj)				(G_TYPE_CHECK_INSTANCE_CAST((obj), CAT_TYPE_STATION_BUTTON, CatStationButton))
 #define CAT_STATION_BUTTON_CLASS(klass) 	(G_TYPE_CHECK_CLASS_CAST((klass), CAT_STATION_BUTTON, CatStationButtonClass))
@@ -58,12 +56,11 @@ struct _CatStationButtonClass {
 	GtkButtonClass parent_class;
 };
 
+GType cat_station_button_get_type(void);
 GtkWidget* cat_station_button_new(void);
 guint cat_station_button_get_id(CatStationButton* button);
 void cat_station_button_set_id(CatStationButton* button, guint station_id);
 CatStationFile cat_station_button_get_station_file(CatStationButton* button);
 void cat_station_button_set_station_file(CatStationButton* button, CatStationFile station_file);
-
-G_END_DECLS
 
 #endif /* __CAT_STATION_BUTTON_H__ */

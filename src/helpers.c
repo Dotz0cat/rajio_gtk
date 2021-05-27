@@ -19,6 +19,7 @@ This file is part of Rajio.
 
 #include "helpers.h"
 #include "station_reader.h"
+#include "parser.h"
 #include "callbacks.h"
 
 void localDB(RajioApp* app) {
@@ -84,8 +85,8 @@ void add_station(GtkWidget* flowbox, char* station_name, char* image_file, int i
 
     button = cat_station_button_new();
 
-    cat_station_button_set_id(button, id);
-    cat_station_button_set_station_file(button, station_file);
+    cat_station_button_set_id(CAT_STATION_BUTTON(button), id);
+    cat_station_button_set_station_file(CAT_STATION_BUTTON(button), station_file);
 
     add_button_callback(GTK_BUTTON(button), app);
 
