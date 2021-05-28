@@ -29,14 +29,15 @@ void add_button_callback(GtkButton* button, RajioApp* app) {
 }
 
 static void event_box_clicked_cb(GtkWidget* widget, gpointer data) {
+    RajioApp* app = G_POINTER_TO_RAJIO_APP(data);
     int id = cat_station_button_get_id(CAT_STATION_BUTTON(widget));
     CatStationFile file = cat_station_button_get_station_file(CAT_STATION_BUTTON(widget));
 
-    rajio_app_set_most_recent_id(RAJIO_APP(data), id);
-    rajio_app_set_most_recent_file(RAJIO_APP(data), file);
+    rajio_app_set_most_recent_id(app, id);
+    rajio_app_set_most_recent_file(app, file);
 
-    if (start_playing(id, file, RAJIO_APP(data)) != 0) {
-        error_message_popup(rajio_app_get_gui(RAJIO_APP(data))->window, "There was a error somewhere");
+    if (start_playing(id, file, app) != 0) {
+        error_message_popup(rajio_app_get_gui(app)->window, "There was a error somewhere");
         return;
     }
 
@@ -51,8 +52,9 @@ void add_other_button_callbacks(UIWidgets* UI, RajioApp* app) {
 }
 
 static void button_clicked_cb(GtkWidget* widget, gpointer data) {
+    RajioApp* app = G_POINTER_TO_RAJIO_APP(data);
 
-    DialogWidgets* DIALOG = build_dialog(rajio_app_get_gui(RAJIO_APP(data))->window);
+    DialogWidgets* DIALOG = build_dialog(rajio_app_get_gui(app)->window);
 
     char* name_value;
     char* thumbnail_path;
@@ -103,7 +105,7 @@ static void button_clicked_cb(GtkWidget* widget, gpointer data) {
 
                 if (is_valid_url(address) == 0) {
                     num_of_addresses = 1;
-                    if (append_new_address(rajio_app_get_local_file(RAJIO_APP(data)), get_highest_id(rajio_app_get_local_file(RAJIO_APP(data)))+1, address) != 0) {
+                    if (append_new_address(rajio_app_get_local_file(app), get_highest_id(rajio_app_get_local_file(app))+1, address) != 0) {
                         fprintf(stderr, "There was a error adding a address to the table\r\n");
                     }
                 }
@@ -116,7 +118,7 @@ static void button_clicked_cb(GtkWidget* widget, gpointer data) {
             else {
                 //the use file button is toggled
                 char* address = gtk_editable_get_chars(GTK_EDITABLE(DIALOG->address_file_entry), 0, -1);
-                num_of_addresses = add_stations(address, rajio_app_get_local_file(RAJIO_APP(data)));
+                num_of_addresses = add_stations(address, rajio_app_get_local_file(app));
                 if (num_of_addresses <= 0) {
                     error_message_popup(DIALOG->dialog, "There was a error parsing the file provided\r\nor the file was not valid");
                     break;
@@ -128,11 +130,11 @@ static void button_clicked_cb(GtkWidget* widget, gpointer data) {
                 error_message_popup(DIALOG->dialog, "There was a issue somewhere");
             }
 
-            if (append_new_station(rajio_app_get_local_file(RAJIO_APP(data)), get_highest_id(rajio_app_get_local_file(RAJIO_APP(data)))+1, name_value, thumbnail_path, num_of_addresses) != 0) {
+            if (append_new_station(rajio_app_get_local_file(app), get_highest_id(rajio_app_get_local_file(app))+1, name_value, thumbnail_path, num_of_addresses) != 0) {
                 error_message_popup(DIALOG->dialog, "There was a error adding the station");
             }
 
-            add_station(rajio_app_get_gui(RAJIO_APP(data))->flow, name_value, thumbnail_path, get_highest_id(rajio_app_get_local_file(RAJIO_APP(data))), LOCAL, RAJIO_APP(data));
+            add_station(rajio_app_get_gui(app)->flow, name_value, thumbnail_path, get_highest_id(rajio_app_get_local_file(app)), LOCAL, app);
 
             g_free(name_value);
             free(thumbnail_path);
@@ -198,30 +200,32 @@ static void file_chooser_address_clicked_cb(GtkWidget* widget, gpointer dialog) 
 }
 
 static void play_button_clicked_cb(GtkWidget* widget, gpointer data) {
-    char* file_name = rajio_app_get_system_file(RAJIO_APP(data));
-    switch (rajio_app_get_most_recent_file(RAJIO_APP(data))) {
+    RajioApp* app = G_POINTER_TO_RAJIO_APP(data);
+
+    char* file_name = rajio_app_get_system_file(app);
+    switch (rajio_app_get_most_recent_file(app)) {
         case SYSTEM:
-            file_name = rajio_app_get_system_file(RAJIO_APP(data));
+            file_name = rajio_app_get_system_file(app);
             break;
         case LOCAL:
-            file_name = rajio_app_get_local_file(RAJIO_APP(data));
+            file_name = rajio_app_get_local_file(app);
             break;
         default:
             fprintf(stderr, "Something went wrong\r\n");
             break;
     }
 
-    gst_element_set_state(rajio_app_get_pipeline(RAJIO_APP(data)), GST_STATE_PLAYING);
+    gst_element_set_state(rajio_app_get_pipeline(app), GST_STATE_PLAYING);
 
     char* thumbnail;
 
-    thumbnail = read_station_thumbnail(file_name, rajio_app_get_most_recent_id(RAJIO_APP(data)));
+    thumbnail = read_station_thumbnail(file_name, rajio_app_get_most_recent_id(app));
 
     char* name;
 
-    name = read_station_name(file_name, rajio_app_get_most_recent_id(RAJIO_APP(data)));
+    name = read_station_name(file_name, rajio_app_get_most_recent_id(app));
 
-    UIWidgets* UI = rajio_app_get_gui(RAJIO_APP(data));
+    UIWidgets* UI = rajio_app_get_gui(app);
 
     gtk_widget_show(UI->stop);
     gtk_widget_show(UI->pause);
@@ -234,15 +238,19 @@ static void play_button_clicked_cb(GtkWidget* widget, gpointer data) {
 }
 
 static void stop_button_clicked_cb(GtkWidget* widget, gpointer data) {
-    if (stop_playing(RAJIO_APP(data)) != 0) {
-        error_message_popup(rajio_app_get_gui(RAJIO_APP(data))->window, "There was a error with stoping");
+    RajioApp* app = G_POINTER_TO_RAJIO_APP(data);
+
+    if (stop_playing(app) != 0) {
+        error_message_popup(rajio_app_get_gui(app)->window, "There was a error with stoping");
     }
 }
 
 static void pause_button_clicked_cb(GtkWidget* widget, gpointer data) {
-    gst_element_set_state(rajio_app_get_pipeline(RAJIO_APP(data)), GST_STATE_PAUSED);
+    RajioApp* app = G_POINTER_TO_RAJIO_APP(data);
 
-    UIWidgets* UI = rajio_app_get_gui(RAJIO_APP(data));
+    gst_element_set_state(rajio_app_get_pipeline(app), GST_STATE_PAUSED);
+
+    UIWidgets* UI = rajio_app_get_gui(app);
 
     gtk_label_set_text(GTK_LABEL(UI->station_label), "Paused");
 

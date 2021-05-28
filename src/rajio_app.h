@@ -28,6 +28,7 @@ This file is part of Rajio.
 
 #define CAT_TYPE_RAJIO_APP              (rajio_app_get_type())
 #define RAJIO_APP(obj)                  (G_TYPE_CHECK_INSTANCE_CAST((obj), CAT_TYPE_RAJIO_APP, RajioApp))
+#define G_POINTER_TO_RAJIO_APP(p)       ( (RajioApp* ) (p))
 
 typedef struct _RajioApp RajioApp;
 typedef struct _RajioAppClass RajioAppClass;

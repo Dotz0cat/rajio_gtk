@@ -82,17 +82,20 @@ extern int genaric_regex(const char* string, const char* regex_string);
 
 int main(int argc, char* argv[]) {
 
-    //GstBus* bus;
-
-    //gtk_init(&argc, &argv);
-
     gst_init(&argc, &argv);
 
     GtkApplication* app;
 
     app = rajio_app_new();
 
-    rajio_app_set_system_file(RAJIO_APP(app), stations_file);
+    char* system_file = strdup(stations_file);
+
+    //sprintf(system_file, "%s", stations_file);
+
+    printf("%s\r\n", system_file);
+    printf("%s\r\n", stations_file);
+
+    rajio_app_set_system_file(RAJIO_APP(app), system_file);
 
     return g_application_run(G_APPLICATION(app), argc, argv);
 }

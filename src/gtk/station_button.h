@@ -56,6 +56,12 @@ struct _CatStationButtonClass {
 	GtkButtonClass parent_class;
 };
 
+struct _CatStationButtonPrivate {
+    guint station_id;
+
+    CatStationFile station_file;
+};
+
 GType cat_station_button_get_type(void);
 GtkWidget* cat_station_button_new(void);
 guint cat_station_button_get_id(CatStationButton* button);
