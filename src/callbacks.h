@@ -20,14 +20,14 @@ This file is part of Rajio.
 #include "rajio_app.h"
 
 void add_button_callback(GtkButton* button, RajioApp* app);
-static void event_box_clicked_cb(GtkWidget* widget, gpointer data);
+static gboolean event_box_clicked_cb(GtkWidget* widget, GdkEvent* event, gpointer data);
 void add_other_button_callbacks(UIWidgets* UI, RajioApp* app);
-static void button_clicked_cb(GtkWidget* widget, gpointer data);
-static void file_chooser_thumbnail_clicked_cb(GtkWidget* widget, gpointer dialog);
-static void file_chooser_address_clicked_cb(GtkWidget* widget, gpointer dialog);
-static void play_button_clicked_cb(GtkWidget* widget, gpointer data);
-static void stop_button_clicked_cb(GtkWidget* widget, gpointer data);
-static void pause_button_clicked_cb(GtkWidget* widget, gpointer data);
+static gboolean button_clicked_cb(GtkWidget* widget, GdkEvent* event, gpointer data);
+static void file_chooser_thumbnail_clicked_cb(GtkButton* button, gpointer dialog);
+static void file_chooser_address_clicked_cb(GtkButton* button, gpointer dialog);
+static void play_button_clicked_cb(GtkButton* button, gpointer data);
+static void stop_button_clicked_cb(GtkButton* button, gpointer data);
+static void pause_button_clicked_cb(GtkButton* button, gpointer data);
 static void error_message_popup(GtkWidget* parrent, char* error_message);
 void async_read_wrapper(GFile* file, int io_priority, GCancellable* cancellable, gpointer data);
 static void file_read_cb(GObject* source_object, GAsyncResult* res, gpointer user_data);

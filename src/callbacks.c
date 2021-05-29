@@ -25,10 +25,10 @@ This file is part of Rajio.
 #include "rajio_app.h"
 
 void add_button_callback(GtkButton* button, RajioApp* app) {
-    g_signal_connect(GTK_BUTTON(button), "button_press_event", G_CALLBACK(event_box_clicked_cb), app);
+    g_signal_connect(GTK_BUTTON(button), "button_press_event", G_CALLBACK(event_box_clicked_cb), (gpointer) app);
 }
 
-static void event_box_clicked_cb(GtkWidget* widget, gpointer data) {
+static gboolean event_box_clicked_cb(GtkWidget* widget, GdkEvent* event, gpointer data) {
     RajioApp* app = G_POINTER_TO_RAJIO_APP(data);
     int id = cat_station_button_get_id(CAT_STATION_BUTTON(widget));
     CatStationFile file = cat_station_button_get_station_file(CAT_STATION_BUTTON(widget));
@@ -38,10 +38,10 @@ static void event_box_clicked_cb(GtkWidget* widget, gpointer data) {
 
     if (start_playing(id, file, app) != 0) {
         error_message_popup(rajio_app_get_gui(app)->window, "There was a error somewhere");
-        return;
+        return TRUE;
     }
 
-    return;
+    return TRUE;
 }
 
 void add_other_button_callbacks(UIWidgets* UI, RajioApp* app) {
@@ -51,7 +51,7 @@ void add_other_button_callbacks(UIWidgets* UI, RajioApp* app) {
     g_signal_connect(UI->pause, "clicked", G_CALLBACK(pause_button_clicked_cb), app);
 }
 
-static void button_clicked_cb(GtkWidget* widget, gpointer data) {
+static gboolean button_clicked_cb(GtkWidget* widget, GdkEvent* event, gpointer data) {
     RajioApp* app = G_POINTER_TO_RAJIO_APP(data);
 
     DialogWidgets* DIALOG = build_dialog(rajio_app_get_gui(app)->window);
@@ -147,10 +147,12 @@ static void button_clicked_cb(GtkWidget* widget, gpointer data) {
     gtk_widget_destroy(DIALOG->dialog);
 
     free(DIALOG);
+
+    return TRUE;
 }
 
 //this is for the thumbnail
-static void file_chooser_thumbnail_clicked_cb(GtkWidget* widget, gpointer dialog) {
+static void file_chooser_thumbnail_clicked_cb(GtkButton* button, gpointer dialog) {
     DialogWidgets* DIALOG = (DialogWidgets*) dialog;
 
     GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
@@ -175,7 +177,7 @@ static void file_chooser_thumbnail_clicked_cb(GtkWidget* widget, gpointer dialog
 }
 
 //this is for the address
-static void file_chooser_address_clicked_cb(GtkWidget* widget, gpointer dialog) {
+static void file_chooser_address_clicked_cb(GtkButton* button, gpointer dialog) {
     DialogWidgets* DIALOG = (DialogWidgets*) dialog;
 
     GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
@@ -199,7 +201,7 @@ static void file_chooser_address_clicked_cb(GtkWidget* widget, gpointer dialog) 
     gtk_widget_destroy(chooser);
 }
 
-static void play_button_clicked_cb(GtkWidget* widget, gpointer data) {
+static void play_button_clicked_cb(GtkButton* button, gpointer data) {
     RajioApp* app = G_POINTER_TO_RAJIO_APP(data);
 
     char* file_name = rajio_app_get_system_file(app);
@@ -237,7 +239,7 @@ static void play_button_clicked_cb(GtkWidget* widget, gpointer data) {
     free(name);
 }
 
-static void stop_button_clicked_cb(GtkWidget* widget, gpointer data) {
+static void stop_button_clicked_cb(GtkButton* button, gpointer data) {
     RajioApp* app = G_POINTER_TO_RAJIO_APP(data);
 
     if (stop_playing(app) != 0) {
@@ -245,7 +247,7 @@ static void stop_button_clicked_cb(GtkWidget* widget, gpointer data) {
     }
 }
 
-static void pause_button_clicked_cb(GtkWidget* widget, gpointer data) {
+static void pause_button_clicked_cb(GtkButton* button, gpointer data) {
     RajioApp* app = G_POINTER_TO_RAJIO_APP(data);
 
     gst_element_set_state(rajio_app_get_pipeline(app), GST_STATE_PAUSED);

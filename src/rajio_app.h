@@ -63,27 +63,27 @@ struct _RajioAppPrivate {
     GstElement* pipeline;
 
     CatStationFile most_recent_file;
-    int most_recent_id;
-    int most_recent_reroll;
+    gint most_recent_id;
+    gint most_recent_reroll;
 
-    char* local_file;
-    char* system_file;
+    gchar* local_file;
+    gchar* system_file;
 };
 
 GType rajio_app_get_type(void);
 GtkApplication* rajio_app_new(void);
 UIWidgets* rajio_app_get_gui(RajioApp* app);
-char* rajio_app_get_local_file(RajioApp* app);
-void rajio_app_set_local_file(RajioApp* app, char* file);
-char* rajio_app_get_system_file(RajioApp* app);
-void rajio_app_set_system_file(RajioApp* app, char* file);
-int rajio_app_get_most_recent_id(RajioApp* app);
-void rajio_app_set_most_recent_id(RajioApp* app, int id);
+gchar* rajio_app_get_local_file(RajioApp* app);
+void rajio_app_set_local_file(RajioApp* app, gchar* file);
+gchar* rajio_app_get_system_file(RajioApp* app);
+void rajio_app_set_system_file(RajioApp* app, gchar* file);
+gint rajio_app_get_most_recent_id(RajioApp* app);
+void rajio_app_set_most_recent_id(RajioApp* app, gint id);
 CatStationFile rajio_app_get_most_recent_file(RajioApp* app);
 void rajio_app_set_most_recent_file(RajioApp* app, CatStationFile file);
 GstElement* rajio_app_get_pipeline(RajioApp* app);
-int rajio_app_get_most_recent_reroll(RajioApp* app);
-void rajio_app_set_most_recent_reroll(RajioApp* app, int reroll);
+gint rajio_app_get_most_recent_reroll(RajioApp* app);
+void rajio_app_set_most_recent_reroll(RajioApp* app, gint reroll);
 void rajio_app_increment_most_recent_reroll(RajioApp* app);
 void rajio_app_increment_most_recent_id(RajioApp* app);
 

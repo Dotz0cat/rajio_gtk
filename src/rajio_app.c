@@ -30,6 +30,8 @@ static void rajio_app_init(RajioApp* app) {
     app->priv->most_recent_id = 1;
     app->priv->most_recent_reroll = 1;
     app->priv->most_recent_file = LOCAL;
+    app->priv->system_file = NULL;
+    app->priv->local_file = NULL;
 }
 
 static void rajio_app_activate(GApplication* app) {
@@ -38,6 +40,8 @@ static void rajio_app_activate(GApplication* app) {
     //UIWidgets* UI = RAJIO_APP(app)->priv->UI;
 
     UIWidgets* UI = rajio_app_get_gui(RAJIO_APP(app));
+
+    gtk_application_inhibit(GTK_APPLICATION(app), UI->window, GTK_APPLICATION_INHIBIT_SUSPEND, "Don't want the music to stop");
 
     gtk_window_set_default_size(GTK_WINDOW(UI->window), 1000, 400);
 
@@ -86,27 +90,27 @@ UIWidgets* rajio_app_get_gui(RajioApp* app) {
     return app->priv->UI;
 }
 
-char* rajio_app_get_local_file(RajioApp* app) {
+gchar* rajio_app_get_local_file(RajioApp* app) {
     return app->priv->local_file;
 }
 
-void rajio_app_set_local_file(RajioApp* app, char* file) {
+void rajio_app_set_local_file(RajioApp* app, gchar* file) {
     app->priv->local_file = file;
 }
 
-char* rajio_app_get_system_file(RajioApp* app) {
+gchar* rajio_app_get_system_file(RajioApp* app) {
     return app->priv->system_file;
 }
 
-void rajio_app_set_system_file(RajioApp* app, char* file) {
-    app->priv->system_file = file;
+void rajio_app_set_system_file(RajioApp* app, gchar* file) {
+    app->priv->system_file = g_strdup(file);
 }
 
-int rajio_app_get_most_recent_id(RajioApp* app) {
+gint rajio_app_get_most_recent_id(RajioApp* app) {
     return app->priv->most_recent_id;
 }
 
-void rajio_app_set_most_recent_id(RajioApp* app, int id) {
+void rajio_app_set_most_recent_id(RajioApp* app, gint id) {
     app->priv->most_recent_id = id;
 }
 
@@ -122,11 +126,11 @@ GstElement* rajio_app_get_pipeline(RajioApp* app) {
     return app->priv->pipeline;
 }
 
-int rajio_app_get_most_recent_reroll(RajioApp* app) {
+gint rajio_app_get_most_recent_reroll(RajioApp* app) {
     return app->priv->most_recent_reroll;
 }
 
-void rajio_app_set_most_recent_reroll(RajioApp* app, int reroll) {
+void rajio_app_set_most_recent_reroll(RajioApp* app, gint reroll) {
     app->priv->most_recent_reroll = reroll;
 }
 
