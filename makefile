@@ -1,5 +1,5 @@
 #CC=gcc
-CFLAGS?= -O2 -g -Wall -Wextra -Wshadow
+CFLAGS?= -O2 -g
 CPPFLAGS= $(shell pkg-config --cflags gtk+-3.0 gstreamer-1.0)
 LDLIBS= $(shell pkg-config --libs gtk+-3.0 sqlite3 gstreamer-1.0)
 
