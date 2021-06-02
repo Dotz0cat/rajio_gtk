@@ -26,18 +26,8 @@ This file is part of Rajio.
 #include <gio/gio.h>
 #pragma clang diagnostic pop
 
-//prototypes
-int add_stations(char* file_name, char* sql_file);
-int m3u_parser(char* file_name, char* sql_file);
-int pls_parser(char* file_name, char* sql_file);
-int is_valid_url(char* url);
-int contains_a_pls(char* url);
-char* get_address_from_pls_over_net(char* pls_file);
-int genaric_regex(const char* string, const char* regex_string);
-
-//external prototypes
-extern int append_new_address(char* file_name, int id, char* address);
-extern int get_highest_id(char* file_name);
+#include "parser.h"
+#include "station_reader.h"
 
 int add_stations(char* file_name, char* sql_file) {
 	char string[512];

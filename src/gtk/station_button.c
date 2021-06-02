@@ -1,5 +1,5 @@
 /*
-Copyright 2020 Dotz0cat
+Copyright 2020-2021 Dotz0cat
 
 This file is part of Rajio.
 
@@ -27,32 +27,16 @@ This file is part of Rajio.
 #pragma clang diagnostic pop
 #include "station_button.h"
 
-struct _CatStationButtonPrivate {
-    guint station_id;
-
-    CatStationFile station_file;
-};
-
-
-static void cat_station_button_class_init(CatStationButtonClass* class);
-static void cat_station_button_init(CatStationButton* station_button);
-guint cat_station_button_get_id(CatStationButton* button);
-void cat_station_button_set_id(CatStationButton* button, guint station_id);
-CatStationFile cat_station_button_get_station_file(CatStationButton* button);
-void cat_station_button_set_station_file(CatStationButton* button, CatStationFile station_file);
-
-G_DEFINE_TYPE_WITH_CODE(CatStationButton, cat_station_button, GTK_TYPE_BUTTON, G_ADD_PRIVATE(CatStationButton))
+G_DEFINE_TYPE_WITH_CODE(CatStationButton, cat_station_button, GTK_TYPE_BUTTON, G_ADD_PRIVATE(CatStationButton));
 
 static void cat_station_button_class_init(CatStationButtonClass* class) {
-    GObject* gobject_class;
+    GObjectClass* gobject_class;
     GtkWidgetClass* widget_class;
     GtkButtonClass* button_class;
 
     gobject_class = G_OBJECT_CLASS(class);
-    widget_class = (GtkWidgetClass* ) class;
-    button_class = (GtkButtonClass* ) class;
-
-
+    widget_class = GTK_WIDGET_CLASS(class);
+    button_class = GTK_BUTTON_CLASS(class);
 }
 
 static void cat_station_button_init(CatStationButton* button) {
@@ -61,8 +45,6 @@ static void cat_station_button_init(CatStationButton* button) {
     button->priv = cat_station_button_get_instance_private(button);
     button->priv->station_id = 0;
     button->priv->station_file = LOCAL;
-
-    //button->station_id = 0;
 }
 
 GtkWidget* cat_station_button_new(void) {

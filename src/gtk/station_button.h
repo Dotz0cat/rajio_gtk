@@ -1,5 +1,5 @@
 /*
-Copyright 2020 Dotz0cat
+Copyright 2020-2021 Dotz0cat
 
 This file is part of Rajio.
 
@@ -21,11 +21,10 @@ This file is part of Rajio.
 #define __CAT_STATION_BUTTON_H__
 
 #include <gdk/gdk.h>
+//clang is loud
 #pragma clang diagnostic ignored "-Weverything"
 #include <gtk/gtk.h>
 #pragma clang diagnostic pop
-
-G_BEGIN_DECLS
 
 #define CAT_TYPE_STATION_BUTTON				(cat_station_button_get_type())
 #define CAT_STATION_BUTTON(obj)				(G_TYPE_CHECK_INSTANCE_CAST((obj), CAT_TYPE_STATION_BUTTON, CatStationButton))
@@ -51,23 +50,23 @@ struct _CatStationButton {
 	GtkButton button;
 
 	CatStationButtonPrivate* priv;
-	//guint station_id;
-	//enum here
-	//enum
 };
 
 struct _CatStationButtonClass {
 	GtkButtonClass parent_class;
-
-  	//void (* clicked)  (GtkButton* button);
 };
 
+struct _CatStationButtonPrivate {
+    guint station_id;
+
+    CatStationFile station_file;
+};
+
+GType cat_station_button_get_type(void);
 GtkWidget* cat_station_button_new(void);
 guint cat_station_button_get_id(CatStationButton* button);
 void cat_station_button_set_id(CatStationButton* button, guint station_id);
 CatStationFile cat_station_button_get_station_file(CatStationButton* button);
 void cat_station_button_set_station_file(CatStationButton* button, CatStationFile station_file);
-
-G_END_DECLS
 
 #endif /* __CAT_STATION_BUTTON_H__ */

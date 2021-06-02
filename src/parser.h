@@ -1,5 +1,5 @@
 /*
-Copyright 2020-2021 Dotz0cat
+Copyright 2021 Dotz0cat
 
 This file is part of Rajio.
 
@@ -17,28 +17,10 @@ This file is part of Rajio.
     along with Rajio.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-//clang is loud
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Weverything"
-#include <gtk/gtk.h>
-#pragma clang diagnostic pop
-
-#include "rajio_app.h"
-
-//marcos
-#ifndef stations_file
-    #define stations_file "/usr/local/share/rajio/stations"
-#endif
-
-int main(int argc, char* argv[]) {
-
-    gst_init(&argc, &argv);
-
-    GtkApplication* app;
-
-    app = rajio_app_new();
-
-    rajio_app_set_system_file(RAJIO_APP(app), stations_file);
-
-    return g_application_run(G_APPLICATION(app), argc, argv);
-}
+int add_stations(char* file_name, char* sql_file);
+int m3u_parser(char* file_name, char* sql_file);
+int pls_parser(char* file_name, char* sql_file);
+int is_valid_url(char* url);
+int contains_a_pls(char* url);
+char* get_address_from_pls_over_net(char* pls_file);
+int genaric_regex(const char* string, const char* regex_string);

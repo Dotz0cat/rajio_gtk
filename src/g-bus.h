@@ -1,5 +1,5 @@
 /*
-Copyright 2020-2021 Dotz0cat
+Copyright 2021 Dotz0cat
 
 This file is part of Rajio.
 
@@ -17,28 +17,14 @@ This file is part of Rajio.
     along with Rajio.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-//clang is loud
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Weverything"
-#include <gtk/gtk.h>
-#pragma clang diagnostic pop
-
+#include <gstreamer-1.0/gst/gst.h>
 #include "rajio_app.h"
+#include "helpers.h"
 
-//marcos
-#ifndef stations_file
-    #define stations_file "/usr/local/share/rajio/stations"
-#endif
-
-int main(int argc, char* argv[]) {
-
-    gst_init(&argc, &argv);
-
-    GtkApplication* app;
-
-    app = rajio_app_new();
-
-    rajio_app_set_system_file(RAJIO_APP(app), stations_file);
-
-    return g_application_run(G_APPLICATION(app), argc, argv);
-}
+void set_message_handlers(GstBus* bus, RajioApp* app);
+void error_handler(GstBus* bus, GstMessage* msg, gpointer data);
+void warn_handler(GstBus* bus, GstMessage* msg, gpointer data);
+void eos_handler(GstBus* bus, GstMessage* msg, gpointer data);
+void have_type(GstElement* typefind, guint probability, GstCaps* caps, gpointer user_data);
+void deep_element_stuff(GstBin* self, GstBin* sub_bin, GstElement* element, gpointer data);
+void element_stuff(GstBin* self, GstElement* element, gpointer data);

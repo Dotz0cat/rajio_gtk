@@ -17,26 +17,21 @@ This file is part of Rajio.
     along with Rajio.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#ifndef __RAJIO_H__
+#define __RAJIO_H__
+
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <sqlite3.h>
 #include <glib-2.0/glib.h>
 #include <gstreamer-1.0/gst/gst.h>
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Weverything"
 #include <gtk/gtk.h>
 #pragma clang diagnostic pop
-#include <pwd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 
 #include "gtk/station_button.h"
-
-extern int most_recent_id;
-extern CatStationFile most_recent_file;
-extern int most_recent_reroll;
-extern GstElement* pipeline;
 
 typedef struct _img_and_dims img_and_dims;
 
@@ -45,19 +40,6 @@ struct _img_and_dims {
         int x;
         int y;
     };
-
-typedef struct _UIWidgets UIWidgets;
-
-struct _UIWidgets {
-	GtkWidget* window;
-	GtkWidget* flow;
-	GtkWidget* station_image;
-	GtkWidget* station_label;
-	GtkWidget* station_add;
-	GtkWidget* pause;
-	GtkWidget* play;
-	GtkWidget* stop;
-};
 
 typedef struct _DialogWidgets DialogWidgets;
 
@@ -72,3 +54,5 @@ struct _DialogWidgets {
     GtkWidget* address_file_chooser;
     GtkWidget* address_manual_entry;
 };
+
+#endif /* __RAJIO_H__ */

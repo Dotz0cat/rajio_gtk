@@ -1,5 +1,5 @@
 /*
-Copyright 2020 Dotz0cat
+Copyright 2020-2021 Dotz0cat
 
 This file is part of Rajio.
 
@@ -17,15 +17,13 @@ This file is part of Rajio.
     along with Rajio.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "rajio.h"
+#include "gui.h"
+#include "rajio_app.h"
 
-UIWidgets* build_gui(void);
-DialogWidgets* build_dialog(GtkWidget* window);
-
-UIWidgets* build_gui(void) {
+UIWidgets* build_gui(GtkApplication* app) {
 	UIWidgets* UI = malloc(sizeof(UIWidgets));
 
-	UI->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	UI->window = gtk_application_window_new(app);
 
 	GtkWidget* main_box;
 	main_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
@@ -83,7 +81,7 @@ DialogWidgets* build_dialog(GtkWidget* window) {
 
     GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
 
-    UI->dialog = gtk_dialog_new_with_buttons("Add Station", window, flags, "Ok", GTK_RESPONSE_ACCEPT, "Cancel", GTK_RESPONSE_REJECT, NULL);
+    UI->dialog = gtk_dialog_new_with_buttons("Add Station", GTK_WINDOW(window), flags, "Ok", GTK_RESPONSE_ACCEPT, "Cancel", GTK_RESPONSE_REJECT, NULL);
 
     //make a grid and stuff and add stuff to it
     GtkWidget* content_area;

@@ -1,5 +1,5 @@
 /*
-Copyright 2020-2021 Dotz0cat
+Copyright 2021 Dotz0cat
 
 This file is part of Rajio.
 
@@ -17,28 +17,15 @@ This file is part of Rajio.
     along with Rajio.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-//clang is loud
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Weverything"
-#include <gtk/gtk.h>
-#pragma clang diagnostic pop
+#include <sqlite3.h>
 
-#include "rajio_app.h"
-
-//marcos
-#ifndef stations_file
-    #define stations_file "/usr/local/share/rajio/stations"
-#endif
-
-int main(int argc, char* argv[]) {
-
-    gst_init(&argc, &argv);
-
-    GtkApplication* app;
-
-    app = rajio_app_new();
-
-    rajio_app_set_system_file(RAJIO_APP(app), stations_file);
-
-    return g_application_run(G_APPLICATION(app), argc, argv);
-}
+int append_new_station(char* file_name, int id, char* name, char* thumbnail, int num_of_addresses);
+int append_new_address(char* file_name, int id, char* address);
+char* read_station_name(char* file_name, int id);
+char* read_station_thumbnail(char* file_name, int id);
+int get_highest_id(char* file_name);
+char* get_address(char* file_name, int id);
+int local_exsits(const char* file_name);
+int makeDB(const char* file_name);
+char* address_reroll(const char* file_name, int station_id, int reroll);
+int get_num_of_addresses(const char* file_name, int id);
