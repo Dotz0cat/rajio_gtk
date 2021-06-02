@@ -41,7 +41,11 @@ static void rajio_app_activate(GApplication* app) {
 
     UIWidgets* UI = rajio_app_get_gui(RAJIO_APP(app));
 
-    gtk_application_inhibit(GTK_APPLICATION(app), UI->window, GTK_APPLICATION_INHIBIT_SUSPEND, "Don't want the music to stop");
+    int idle = gtk_application_inhibit(GTK_APPLICATION(app), UI->window, GTK_APPLICATION_INHIBIT_IDLE, "Don't want the music to stop");
+
+    if (idle == 0) {
+        fprintf(stderr, "Could not set sleep inhibiter.\r\nPrehaps your DE does not support it\r\n");
+    }
 
     gtk_window_set_default_size(GTK_WINDOW(UI->window), 1000, 400);
 
@@ -71,6 +75,13 @@ static void rajio_app_startup(GApplication* app) {
     RAJIO_APP(app)->priv->pipeline = gst_element_factory_make("playbin", NULL);
 
     bus = gst_element_get_bus(RAJIO_APP(app)->priv->pipeline);
+
+    //GST_PLAY_FLAG_AUDIO
+    //int flags = 0x00000002;
+
+    //g_object_set(RAJIO_APP(app)->priv->pipeline, "flags", flags, NULL);
+
+    gst_util_set_object_arg(RAJIO_APP(app)->priv->pipeline, "flags", "audio");
 
     set_message_handlers(bus, RAJIO_APP(app));
 

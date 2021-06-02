@@ -79,6 +79,11 @@ void add_station(GtkWidget* flowbox, char* station_name, char* image_file, int i
     GtkWidget* label;
     label = gtk_label_new(station_name);
 
+    gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
+    gtk_label_set_line_wrap_mode(GTK_LABEL(label), PANGO_WRAP_WORD);
+    gtk_label_set_max_width_chars(GTK_LABEL(label), 20);
+    gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_CENTER);
+
     gtk_grid_attach(GTK_GRID(grid), label, 0, 2, 3, 1);
 
     GtkWidget* button;
